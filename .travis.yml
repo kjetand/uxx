@@ -1,0 +1,30 @@
+language: cpp
+install:
+  - which pip
+  - pip --version
+  - pip install --user cmake
+
+jobs:
+  include:
+    - os: linux
+      dist: bionic
+      compiler: gcc
+      env:
+        - GCC_VER="10"
+        - MATRIX_EVAL="CC=CXX=g++-${GCC_VER}"
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-10
+
+before_script:
+  - eval "${MATRIX_EVAL}"
+
+script:
+  - mkdir build
+  - cd build
+  - cmake ..
+  - cmake --build .
+  - ctest -V
