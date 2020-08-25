@@ -11,12 +11,13 @@ jobs:
       compiler: gcc
       env:
         - GCC_VER="10"
-        - MATRIX_EVAL="CC=CXX=g++-${GCC_VER}"
+        - MATRIX_EVAL="CC=gcc-${GCC_VER} && CXX=g++-${GCC_VER}"
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
           packages:
+            - gcc-10
             - g++-10
 
 before_script:
