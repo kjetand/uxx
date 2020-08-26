@@ -19,6 +19,9 @@ jobs:
           packages:
             - gcc-10
             - g++-10
+            - libglu1-mesa-dev
+            - freeglut3-dev
+            - mesa-common-dev
 
 before_script:
   - eval "${MATRIX_EVAL}"
