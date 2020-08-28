@@ -5,7 +5,7 @@ add_library(imgui-sfml SHARED
         imgui.cpp)
 
 target_include_directories(imgui-sfml PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}
+        ../include/imgui
         ${SFML_INCLUDE_DIR})
 
 target_link_libraries(imgui-sfml PRIVATE
