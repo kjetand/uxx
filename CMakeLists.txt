@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.15)
 project(uxx CXX)
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
 if (APPLE)
     message(FATAL_ERROR "OSX is currently not supported")
 endif ()
@@ -36,13 +38,31 @@ set(SFML_ROOT ${CMAKE_BINARY_DIR}/SFML-2.5.1/)
 set(SFML_INCLUDE_DIR ${SFML_ROOT}/include/)
 
 if (MSVC)
-    message(STATUS "Building for Windows")
     target_compile_options(project_warnings INTERFACE /W4 /WX "/permissive-")
 
-    set(SFML_LIBRARIES
-            ${SFML_ROOT}/lib/sfml-graphics.lib
-            ${SFML_ROOT}/lib/sfml-system.lib
-            ${SFML_ROOT}/lib/sfml-window.lib)
+    if (CMAKE_BUILD_TYPE EQUAL "DEBUG")
+        message(STATUS "Debug build for Windows")
+        set(SFML_LIBRARIES
+                ${SFML_ROOT}/lib/sfml-graphics-d.lib
+                ${SFML_ROOT}/lib/sfml-system-d.lib
+                ${SFML_ROOT}/lib/sfml-window-d.lib)
+        message(STATUS "Copying SFML debug DLLs to ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+        file(COPY ${SFML_ROOT}/bin/sfml-graphics-d-2.dll
+                ${SFML_ROOT}/bin/sfml-system-d-2.dll
+                ${SFML_ROOT}/bin/sfml-window-d-2.dll
+                DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+    else ()
+        message(STATUS "Release build for Windows")
+        set(SFML_LIBRARIES
+                ${SFML_ROOT}/lib/sfml-graphics.lib
+                ${SFML_ROOT}/lib/sfml-system.lib
+                ${SFML_ROOT}/lib/sfml-window.lib)
+        message(STATUS "Copying SFML release DLLs to ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+        file(COPY ${SFML_ROOT}/bin/sfml-graphics-2.dll
+                ${SFML_ROOT}/bin/sfml-system-2.dll
+                ${SFML_ROOT}/bin/sfml-window-2.dll
+                DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+    endif ()
 else ()
     message(STATUS "Building for Linux")
     target_compile_options(project_warnings INTERFACE

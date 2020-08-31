@@ -1,11 +1,23 @@
 #ifndef _UXX_HPP
 #define _UXX_HPP
 
+#include <concepts>
 #include <string>
+#include <type_traits>
+
+#ifdef _WIN32
+#ifdef BUILDING_UXX
+#define UXX_EXPORT __declspec(dllexport)
+#else
+#define UXX_EXPORT __declspec(dllimport)
+#endif
+#else
+#define UXX_EXPORT
+#endif
 
 namespace uxx {
 
-class string_ref {
+class UXX_EXPORT string_ref {
 public:
     string_ref() = delete;
     constexpr string_ref(const char* str) noexcept // NOLINT
@@ -14,7 +26,6 @@ public:
     }
 
     string_ref(const std::string& str) noexcept; // NOLINT
-
     ~string_ref() noexcept = default;
 
     constexpr string_ref(const string_ref&) noexcept = default;
@@ -34,6 +45,60 @@ public:
 
 private:
     const char* _str;
+};
+
+template <typename F, typename... Args>
+concept function = std::is_invocable_v<F, Args...>;
+
+class UXX_EXPORT window {
+public:
+    explicit window() noexcept = default;
+    ~window() noexcept = default;
+
+    window(const window&) = delete;
+    window(window&&) noexcept = default;
+    window& operator=(const window&) = delete;
+    window& operator=(window&&) noexcept = default;
+};
+
+class UXX_EXPORT app {
+    class canvas {
+    public:
+        explicit canvas() noexcept = default;
+        ~canvas() noexcept = default;
+
+        canvas(const canvas&) = delete;
+        canvas(canvas&&) noexcept = default;
+        canvas& operator=(const canvas&) = delete;
+        canvas& operator=(canvas&&) noexcept = default;
+
+        template <typename F, typename... Args>
+        void window(string_ref, F f, Args&&... args) const requires function<F, window&, Args...>
+        {
+            uxx::window w {};
+            f(w, std::forward<Args>(args)...);
+        }
+    };
+
+public:
+    explicit app() noexcept = default;
+    ~app() noexcept = default;
+
+    app(const app&) = delete;
+    app(app&&) noexcept = default;
+    app& operator=(const app&) = delete;
+    app& operator=(app&&) noexcept = default;
+
+    template <typename F, typename... Args>
+    [[nodiscard]] int run(F f, Args&&... args) const requires function<F, canvas&, Args...>
+    {
+        canvas c;
+        mainloop();
+        return f(c, std::forward<Args>(args)...);
+    }
+
+private:
+    void mainloop() const;
 };
 
 }
