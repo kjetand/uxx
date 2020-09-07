@@ -3,7 +3,7 @@
 int main()
 {
     uxx::app app;
-    return app.run([](auto& canvas, uxx::string_ref title) {
+    return app.run([](auto& canvas, auto title) {
         canvas.window(title, [](auto& /*ignored*/) {});
         return 0;
     },

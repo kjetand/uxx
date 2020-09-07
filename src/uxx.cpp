@@ -17,7 +17,7 @@ void uxx::app::mainloop() const
 {
     sf::RenderWindow w(sf::VideoMode(800, 600), "SFML window");
     while (w.isOpen()) {
-        sf::Event event;
+        sf::Event event{};
         while (w.pollEvent(event)) {
             if (event.type == sf::Event::Closed)
                 w.close();

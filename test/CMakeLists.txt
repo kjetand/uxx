@@ -7,4 +7,4 @@ target_include_directories(unit_tests PRIVATE
 
 target_link_libraries(unit_tests PRIVATE project_warnings ${PROJECT_NAME})
 
-add_test(run_unit_tests unit_tests)
+add_test(run_unit_tests ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/unit_tests)
