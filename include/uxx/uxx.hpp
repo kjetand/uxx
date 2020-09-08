@@ -90,6 +90,8 @@ private:
 
 class UXX_EXPORT app {
 public:
+    enum class exit_code : int { success = 0 };
+
     explicit app() noexcept = default;
     ~app() noexcept = default;
 
@@ -99,15 +101,17 @@ public:
     app& operator=(app&&) noexcept = default;
 
     template <typename F, typename... Args>
-    void run(F f, Args&&... args) const requires function<F, canvas&, Args...>
+    [[nodiscard]] int run(F f, Args&&... args) const requires function<F, canvas&, Args...>
     {
         canvas c;
         mainloop([&]() {
             f(c, std::forward<Args>(args)...);
         });
+        return static_cast<int>(_exit_code);
     }
 
 private:
+    exit_code _exit_code { exit_code::success };
     void mainloop(const std::function<void()>& render) const;
 };
 
