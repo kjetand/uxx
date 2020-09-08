@@ -1,32 +1,43 @@
 language: cpp
+os: linux
+dist: bionic
+compiler: gcc
+
+env:
+  global:
+    - GCC_VER="10"
+    - MATRIX_EVAL="CC=gcc-${GCC_VER} && CXX=g++-${GCC_VER}"
+    - secure: "dw1Qkh9Y0Lobw8p063Nj0vbTWwlnh4hAPu5vQ6iD7mO2+QLfZgF+VpxN/l+aYM+gfbMyMZsw+wpzUbrON8/ZR72ZEQ3jzd0qHXVaPVt7D7KykFmlpvtSUqk6HvE/+T3sxrq9MaQeh42guHbr69h2SuCaa14kdnR/bGxW2o4A45p6FxAkhh6OOk7P2JEnhCFH5e7kEdiC9GQzee0nmBKYTUDLT1DjODXf7AQieDjH73NVZDRR9GHs/KVwU3LlMMOHxNHomNi7++ZNxZx8fkujr/8KeqCqXuJN3KDliMj2sYJ2nJ65VyxM4tE/xPEoW0z1fWWh2xMQBxS4p9wJXXLzf+QsyxOk3dUrpHCObb0/gtx1I0Oo2SE8oix0YjyVwE7f7NPLmL29ofdEgXuepHEnMsJfq0SSSJNnpOtx4hH2rKe+f8C4SL+65CE77+u7ReyLrqsmMZWM8lx+w4501TABuNatvHoBKhkFzqpTo40YWs+NAitVVuYrBWxcU7+k2FjDWRUUU6xTbrk6NTKnBMwWFcqktkq00O+DU3zsCAhStxqDBV1IAxV5WASkQwGnd/F7lYerFj7DEIJMgY1BtsX1hF5DT8d2ZvshMESf+rzt9qUfDPZv1P3rcz0Yr1rHb7O7lUiANKg6Kds2V4lYiO6dF5gXGz3lM0P0PvsO43L6fW0="
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - gcc-10
+      - g++-10
+      - libglu1-mesa-dev
+      - freeglut3-dev
+      - mesa-common-dev
+  coverity_scan:
+    project:
+      name: "kjetand/uxx"
+      description: "Simple immediate mode GUI library for C++20"
+    notification_email: kjetil.andrese@gmail.com
+    build_command_prepend: "cov-configure --compiler g++-10 --comptype gcc --template && mkdir coverity_build && cd coverity_build && cmake .."
+    build_command: "make -j2"
+    branch_pattern: master
+
 install:
   - which pip
   - pip --version
   - pip install --user cmake
 
-jobs:
-  include:
-    - os: linux
-      dist: bionic
-      compiler: gcc
-      env:
-        - GCC_VER="10"
-        - MATRIX_EVAL="CC=gcc-${GCC_VER} && CXX=g++-${GCC_VER}"
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - gcc-10
-            - g++-10
-            - libglu1-mesa-dev
-            - freeglut3-dev
-            - mesa-common-dev
-
 before_script:
   - eval "${MATRIX_EVAL}"
 
 script:
+  - FILE=/home/travis/build/kjetand/uxx/coverity_build/cov-int/build-log.txt; if test -f "$FILE"; then cat "$FILE"; fi;
   - mkdir build
   - cd build
   - cmake ..
