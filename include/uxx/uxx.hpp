@@ -2,6 +2,7 @@
 #define _UXX_HPP
 
 #include <concepts>
+#include <functional>
 #include <string>
 #include <type_traits>
 
@@ -12,7 +13,7 @@
 #define UXX_EXPORT __declspec(dllimport)
 #endif
 #else
-#define UXX_EXPORT
+#define UXX_EXPORT __attribute__((visibility("default")))
 #endif
 
 namespace uxx {
@@ -61,25 +62,33 @@ public:
     window& operator=(window&&) noexcept = default;
 };
 
-class UXX_EXPORT app {
-    class canvas {
-    public:
-        explicit canvas() noexcept = default;
-        ~canvas() noexcept = default;
+class UXX_EXPORT canvas {
+public:
+    explicit canvas() noexcept = default;
+    ~canvas() noexcept = default;
 
-        canvas(const canvas&) = delete;
-        canvas(canvas&&) noexcept = default;
-        canvas& operator=(const canvas&) = delete;
-        canvas& operator=(canvas&&) noexcept = default;
+    canvas(const canvas&) = delete;
+    canvas(canvas&&) noexcept = default;
+    canvas& operator=(const canvas&) = delete;
+    canvas& operator=(canvas&&) noexcept = default;
 
-        template <typename F, typename... Args>
-        void window(string_ref, F f, Args&&... args) const requires function<F, window&, Args...>
+    template <typename F, typename... Args>
+    void window(string_ref title, F f, Args&&... args) const requires function<F, window&, Args...>
+    {
+        begin_window(title);
         {
             uxx::window w {};
             f(w, std::forward<Args>(args)...);
         }
-    };
+        end_window();
+    }
 
+private:
+    void begin_window(string_ref title) const;
+    void end_window() const;
+};
+
+class UXX_EXPORT app {
 public:
     explicit app() noexcept = default;
     ~app() noexcept = default;
@@ -90,15 +99,16 @@ public:
     app& operator=(app&&) noexcept = default;
 
     template <typename F, typename... Args>
-    [[nodiscard]] int run(F f, Args&&... args) const requires function<F, canvas&, Args...>
+    void run(F f, Args&&... args) const requires function<F, canvas&, Args...>
     {
         canvas c;
-        mainloop();
-        return f(c, std::forward<Args>(args)...);
+        mainloop([&]() {
+            f(c, std::forward<Args>(args)...);
+        });
     }
 
 private:
-    void mainloop() const;
+    void mainloop(const std::function<void()>& render) const;
 };
 
 }
