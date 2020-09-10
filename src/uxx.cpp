@@ -218,3 +218,18 @@ bool uxx::window::is_collapsed() const noexcept
 {
     return _collapsed == collapsed::yes;
 }
+
+void uxx::window::label(uxx::string_ref text) const
+{
+    ImGui::Text("%s", text.c_str());
+}
+
+bool uxx::window::button(uxx::string_ref text) const
+{
+    return ImGui::Button(text);
+}
+
+void uxx::window::same_line() const
+{
+    ImGui::SameLine();
+}

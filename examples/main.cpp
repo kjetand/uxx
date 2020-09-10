@@ -9,7 +9,13 @@ int main()
 
         canvas.window(title, open, properties, [](uxx::window& w) {
             if (w.is_collapsed()) {
-                std::puts("Collapsed!");
+                return;
+            }
+            w.label("Enter your name:");
+            w.same_line();
+
+            if (w.button("Submit")) {
+                std::puts("Your name is: ");
             }
         });
     },

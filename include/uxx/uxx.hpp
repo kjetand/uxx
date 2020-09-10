@@ -110,6 +110,12 @@ public:
 
     [[nodiscard]] bool is_collapsed() const noexcept;
 
+    void label(string_ref text) const;
+
+    bool button(string_ref text) const;
+
+    void same_line() const;
+
 private:
     collapsed _collapsed;
 };
