@@ -3,6 +3,7 @@
 
 #include <concepts>
 #include <functional>
+#include <optional>
 #include <string>
 #include <type_traits>
 
@@ -53,13 +54,64 @@ concept function = std::is_invocable_v<F, Args...>;
 
 class UXX_EXPORT window {
 public:
-    explicit window() noexcept = default;
+    enum class collapsed {
+        yes,
+        no
+    };
+
+    class UXX_EXPORT properties {
+    public:
+        explicit properties() noexcept = default;
+        ~properties() noexcept = default;
+
+        properties(const properties&) = default;
+        properties(properties&&) noexcept = default;
+        properties& operator=(const properties&) = default;
+        properties& operator=(properties&&) noexcept = default;
+
+        [[nodiscard]] constexpr explicit operator int() const noexcept;
+
+        properties clear() noexcept;
+        properties set_no_title_bar() noexcept;
+        properties set_no_resize() noexcept;
+        properties set_no_move() noexcept;
+        properties set_no_scrollbar() noexcept;
+        properties set_no_scroll_with_mouse() noexcept;
+        properties set_no_collapse() noexcept;
+        properties set_always_auto_resize() noexcept;
+        properties set_no_background() noexcept;
+        properties set_no_saved_settings() noexcept;
+        properties set_no_mouse_inputs() noexcept;
+        properties set_menu_bar() noexcept;
+        properties set_horizontal_scrollbar() noexcept;
+        properties set_no_focus_on_appearing() noexcept;
+        properties set_no_bring_to_front_on_focus() noexcept;
+        properties set_always_vertical_scrollbar() noexcept;
+        properties set_always_horizontal_scrollbar() noexcept;
+        properties set_always_use_window_padding() noexcept;
+        properties set_no_nav_inputs() noexcept;
+        properties set_no_nav_focus() noexcept;
+        properties set_unsaved_document() noexcept;
+        properties set_no_nav() noexcept;
+        properties set_no_decoration() noexcept;
+        properties set_no_inputs() noexcept;
+
+    private:
+        unsigned int _flags { 0 };
+    };
+
+    explicit window(collapsed collapsed) noexcept;
     ~window() noexcept = default;
 
     window(const window&) = delete;
     window(window&&) noexcept = default;
     window& operator=(const window&) = delete;
     window& operator=(window&&) noexcept = default;
+
+    [[nodiscard]] bool is_collapsed() const noexcept;
+
+private:
+    collapsed _collapsed;
 };
 
 class UXX_EXPORT canvas {
@@ -73,18 +125,38 @@ public:
     canvas& operator=(canvas&&) noexcept = default;
 
     template <typename F, typename... Args>
-    void window(string_ref title, F f, Args&&... args) const requires function<F, window&, Args...>
+    void window(string_ref title, F&& f, Args&&... args) const requires function<F, uxx::window&, Args...>
     {
-        begin_window(title);
-        {
-            uxx::window w {};
-            f(w, std::forward<Args>(args)...);
-        }
-        end_window();
+        window_impl(title, std::nullopt, window::properties {}, std::forward<F>(f), std::forward<Args>(args)...);
+    }
+
+    template <typename F, typename... Args>
+    void window(string_ref title, bool& open, F&& f, Args&&... args) const requires function<F, uxx::window&, Args...>
+    {
+        window_impl(title, open, window::properties {}, std::forward<F>(f), std::forward<Args>(args)...);
+    }
+
+    template <typename F, typename... Args>
+    void window(string_ref title, bool& open, const window::properties properties, F&& f, Args&&... args) const requires function<F, uxx::window&, Args...>
+    {
+        window_impl(title, open, properties, std::forward<F>(f), std::forward<Args>(args)...);
     }
 
 private:
-    void begin_window(string_ref title) const;
+    template <typename F, typename... Args>
+    void window_impl(string_ref title, std::optional<std::reference_wrapper<bool>> open, const window::properties properties, F&& f, Args&&... args) const requires function<F, uxx::window&, Args...>
+    {
+        if (open && open->get()) {
+            const auto collapsed = begin_window(title, open, properties);
+            {
+                uxx::window w { collapsed };
+                f(w, std::forward<Args>(args)...);
+            }
+            end_window();
+        }
+    }
+
+    [[nodiscard]] window::collapsed begin_window(string_ref title, std::optional<std::reference_wrapper<bool>> open, window::properties properties) const;
     void end_window() const;
 };
 
