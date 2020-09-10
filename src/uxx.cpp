@@ -233,3 +233,21 @@ void uxx::window::same_line() const
 {
     ImGui::SameLine();
 }
+
+void uxx::window::input_text(uxx::string_ref label, std::string& value) const
+{
+    static const auto string_appender = [](ImGuiInputTextCallbackData* data) {
+        auto* value = reinterpret_cast<std::string*>(data->UserData);
+        if (data->EventFlag == ImGuiInputTextFlags_CallbackResize) {
+            IM_ASSERT(data->Buf == value->c_str());
+            value->resize(data->BufTextLen);
+            data->Buf = const_cast<char*>(value->c_str());
+        }
+        return 0;
+    };
+    const ImGuiInputTextFlags flags = ImGuiInputTextFlags_None | ImGuiInputTextFlags_CallbackResize;
+    auto* raw_value = const_cast<char*>(value.c_str());
+    const auto buf_size = value.capacity() + 1;
+
+    ImGui::InputText(label, raw_value, buf_size, flags, string_appender, &value);
+}

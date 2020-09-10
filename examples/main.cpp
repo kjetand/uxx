@@ -11,11 +11,15 @@ int main()
             if (w.is_collapsed()) {
                 return;
             }
-            w.label("Enter your name:");
+            w.label("Enter your name: ");
             w.same_line();
+
+            static std::string name {};
+            w.input_text("", name);
 
             if (w.button("Submit")) {
                 std::puts("Your name is: ");
+                std::puts(name.c_str());
             }
         });
     },

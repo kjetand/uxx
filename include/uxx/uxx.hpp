@@ -116,6 +116,8 @@ public:
 
     void same_line() const;
 
+    void input_text(string_ref label, std::string& value) const;
+
 private:
     collapsed _collapsed;
 };
