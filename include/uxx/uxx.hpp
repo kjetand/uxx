@@ -53,6 +53,8 @@ template <typename F, typename... Args>
 concept function = std::is_invocable_v<F, Args...>;
 
 class UXX_EXPORT window {
+    friend class scene;
+
 public:
     enum class collapsed {
         yes,
@@ -100,9 +102,6 @@ public:
         unsigned int _flags { 0 };
     };
 
-    explicit window(collapsed collapsed) noexcept;
-    ~window() noexcept = default;
-
     window(const window&) = delete;
     window(window&&) noexcept = default;
     window& operator=(const window&) = delete;
@@ -120,13 +119,15 @@ public:
 
 private:
     collapsed _collapsed;
+
+    explicit window(collapsed collapsed) noexcept;
+    ~window() noexcept = default;
 };
 
 class UXX_EXPORT scene {
-public:
-    explicit scene() noexcept = default;
-    ~scene() noexcept = default;
+    friend class app;
 
+public:
     scene(const scene&) = delete;
     scene(scene&&) noexcept = default;
     scene& operator=(const scene&) = delete;
@@ -151,6 +152,9 @@ public:
     }
 
 private:
+    explicit scene() noexcept = default;
+    ~scene() noexcept = default;
+
     template <typename F, typename... Args>
     void window_impl(string_ref title, std::optional<std::reference_wrapper<bool>> open, const window::properties properties, F&& f, Args&&... args) const requires function<F, uxx::window&, Args...>
     {
