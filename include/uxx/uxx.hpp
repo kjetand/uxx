@@ -122,15 +122,15 @@ private:
     collapsed _collapsed;
 };
 
-class UXX_EXPORT canvas {
+class UXX_EXPORT scene {
 public:
-    explicit canvas() noexcept = default;
-    ~canvas() noexcept = default;
+    explicit scene() noexcept = default;
+    ~scene() noexcept = default;
 
-    canvas(const canvas&) = delete;
-    canvas(canvas&&) noexcept = default;
-    canvas& operator=(const canvas&) = delete;
-    canvas& operator=(canvas&&) noexcept = default;
+    scene(const scene&) = delete;
+    scene(scene&&) noexcept = default;
+    scene& operator=(const scene&) = delete;
+    scene& operator=(scene&&) noexcept = default;
 
     template <typename F, typename... Args>
     void window(string_ref title, F&& f, Args&&... args) const requires function<F, uxx::window&, Args...>
@@ -181,9 +181,9 @@ public:
     app& operator=(app&&) noexcept = default;
 
     template <typename F, typename... Args>
-    [[nodiscard]] int run(F f, Args&&... args) const requires function<F, canvas&, Args...>
+    [[nodiscard]] int run(F f, Args&&... args) const requires function<F, scene&, Args...>
     {
-        canvas c;
+        scene c;
         mainloop([&]() {
             f(c, std::forward<Args>(args)...);
         });

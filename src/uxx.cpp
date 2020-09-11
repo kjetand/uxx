@@ -47,7 +47,7 @@ void uxx::app::mainloop(const std::function<void()>& render) const
     ImGui::SFML::Shutdown();
 }
 
-uxx::window::collapsed uxx::canvas::begin_window(uxx::string_ref title, std::optional<std::reference_wrapper<bool>> open, uxx::window::properties properties) const
+uxx::window::collapsed uxx::scene::begin_window(uxx::string_ref title, std::optional<std::reference_wrapper<bool>> open, uxx::window::properties properties) const
 {
     if (open) {
         return ImGui::Begin(title, &open->get(), static_cast<int>(properties)) ? window::collapsed::no : window::collapsed::yes;
@@ -55,7 +55,7 @@ uxx::window::collapsed uxx::canvas::begin_window(uxx::string_ref title, std::opt
     return ImGui::Begin(title) ? window::collapsed::no : window::collapsed::yes;
 }
 
-void uxx::canvas::end_window() const
+void uxx::scene::end_window() const
 {
     ImGui::End();
 }
@@ -237,11 +237,11 @@ void uxx::window::same_line() const
 void uxx::window::input_text(uxx::string_ref label, std::string& value) const
 {
     static const auto string_appender = [](ImGuiInputTextCallbackData* data) {
-        auto* value = reinterpret_cast<std::string*>(data->UserData);
+        auto* user_data = reinterpret_cast<std::string*>(data->UserData);
         if (data->EventFlag == ImGuiInputTextFlags_CallbackResize) {
-            IM_ASSERT(data->Buf == value->c_str());
-            value->resize(data->BufTextLen);
-            data->Buf = const_cast<char*>(value->c_str());
+            IM_ASSERT(data->Buf == user_data->c_str());
+            user_data->resize(static_cast<std::size_t>(data->BufTextLen));
+            data->Buf = const_cast<char*>(user_data->c_str());
         }
         return 0;
     };
