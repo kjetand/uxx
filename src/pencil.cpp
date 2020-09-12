@@ -43,6 +43,36 @@ unsigned int uxx::rgba_color::to_color_u32() const noexcept
     return ImGui::GetColorU32(ImVec4 { r, g, b, a });
 }
 
+uxx::pencil::properties::properties() noexcept
+    : _flags(ImDrawListFlags_None)
+{
+}
+
+uxx::pencil::properties::operator int() const noexcept
+{
+    return _flags;
+}
+uxx::pencil::properties uxx::pencil::properties::clear() noexcept
+{
+    _flags |= ImDrawListFlags_None;
+    return *this;
+}
+uxx::pencil::properties uxx::pencil::properties::set_anti_aliased_lines() noexcept
+{
+    _flags |= ImDrawListFlags_AntiAliasedLines;
+    return *this;
+}
+uxx::pencil::properties uxx::pencil::properties::set_anti_aliased_lines_using_textures() noexcept
+{
+    _flags |= ImDrawListFlags_AntiAliasedLinesUseTex;
+    return *this;
+}
+uxx::pencil::properties uxx::pencil::properties::set_anti_aliased_fill() noexcept
+{
+    _flags |= ImDrawListFlags_AntiAliasedFill;
+    return *this;
+}
+
 uxx::pencil::corner_properties::corner_properties() noexcept
     : _flags(ImDrawCornerFlags_None)
 {
@@ -85,7 +115,7 @@ uxx::pencil::corner_properties uxx::pencil::corner_properties::set_all() noexcep
 
 uxx::pencil::pencil() noexcept
     : _draw_list(ImGui::GetWindowDrawList())
-    , _color(ImGui::GetColorU32({ 0, 0, 0, 1.0f }))
+    , _color(ImGui::GetColorU32({ 1.0f, 1.0f, 1.0f, 1.0f }))
     , _thickness(1.0f)
     , _rounding(0.0f)
 {
@@ -101,9 +131,24 @@ void uxx::pencil::set_color(const uxx::rgba_color& color) noexcept
     _color = color.to_color_u32();
 }
 
+void uxx::pencil::set_properties(const uxx::pencil::properties& props) noexcept
+{
+    cast_draw_list(_draw_list).Flags = static_cast<int>(props);
+}
+
 void uxx::pencil::set_corner_properties(const corner_properties& corner_props) noexcept
 {
     _corner_props = corner_props;
+}
+
+void uxx::pencil::set_thickness(float thickness) noexcept
+{
+    _thickness = thickness;
+}
+
+void uxx::pencil::set_rounding(float rounding) noexcept
+{
+    _rounding = rounding;
 }
 
 void uxx::pencil::draw_line(const uxx::vec2d& from, const uxx::vec2d& to) const

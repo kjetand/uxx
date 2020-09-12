@@ -87,6 +87,27 @@ class pencil {
     friend class window;
 
 public:
+    class UXX_EXPORT properties {
+    public:
+        explicit properties() noexcept;
+        ~properties() noexcept = default;
+
+        properties(const properties&) = default;
+        properties(properties&&) noexcept = default;
+        properties& operator=(const properties&) = default;
+        properties& operator=(properties&&) noexcept = default;
+
+        [[nodiscard]] explicit operator int() const noexcept;
+
+        properties clear() noexcept;
+        properties set_anti_aliased_lines() noexcept;
+        properties set_anti_aliased_lines_using_textures() noexcept;
+        properties set_anti_aliased_fill() noexcept;
+
+    private:
+        int _flags;
+    };
+
     class UXX_EXPORT corner_properties {
     public:
         explicit corner_properties() noexcept;
@@ -114,6 +135,9 @@ public:
 
     UXX_EXPORT void set_color(const rgb_color& color) noexcept;
     UXX_EXPORT void set_color(const rgba_color& color) noexcept;
+    UXX_EXPORT void set_thickness(float thickness) noexcept;
+    UXX_EXPORT void set_rounding(float rounding) noexcept;
+    UXX_EXPORT void set_properties(const properties& props) noexcept;
     UXX_EXPORT void set_corner_properties(const corner_properties& corner_props) noexcept;
 
     UXX_EXPORT void draw_line(const vec2d& from, const vec2d& to) const;
