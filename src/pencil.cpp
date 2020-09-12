@@ -22,6 +22,9 @@ unsigned int uxx::rgba_color::to_color_u32() const noexcept
 
 uxx::pencil::pencil() noexcept
     : _draw_list(ImGui::GetWindowDrawList())
+    , _color(ImGui::GetColorU32({ 0, 0, 0, 1.0f }))
+    , _thickness(1.0f)
+    , _rounding(0.0f)
 {
 }
 
