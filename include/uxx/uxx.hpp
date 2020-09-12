@@ -7,6 +7,7 @@
 #include <optional>
 #include <string>
 #include <type_traits>
+#include <vector>
 
 #ifdef _WIN32
 #ifdef BUILDING_UXX
@@ -75,22 +76,73 @@ struct rgba_color {
     [[nodiscard]] unsigned int to_color_u32() const noexcept;
 };
 
+struct color_rect {
+    rgba_color upper_left;
+    rgba_color upper_right;
+    rgba_color bottom_right;
+    rgba_color& bottom_left;
+};
+
 class pencil {
     friend class window;
 
 public:
+    class UXX_EXPORT corner_properties {
+    public:
+        explicit corner_properties() noexcept;
+        ~corner_properties() noexcept = default;
+
+        corner_properties(const corner_properties&) = default;
+        corner_properties(corner_properties&&) noexcept = default;
+        corner_properties& operator=(const corner_properties&) = default;
+        corner_properties& operator=(corner_properties&&) noexcept = default;
+
+        [[nodiscard]] explicit operator int() const noexcept;
+
+        corner_properties clear() noexcept;
+        corner_properties set_top_left() noexcept;
+        corner_properties set_top_right() noexcept;
+        corner_properties set_bottom_left() noexcept;
+        corner_properties set_bottom_right() noexcept;
+        corner_properties set_all() noexcept;
+
+    private:
+        int _flags;
+    };
+
     UXX_EXPORT ~pencil() noexcept = default;
 
     UXX_EXPORT void set_color(const rgb_color& color) noexcept;
     UXX_EXPORT void set_color(const rgba_color& color) noexcept;
+    UXX_EXPORT void set_corner_properties(const corner_properties& corner_props) noexcept;
 
     UXX_EXPORT void draw_line(const vec2d& from, const vec2d& to) const;
+    UXX_EXPORT void draw_rect(const vec2d& min, const vec2d& max) const;
+    UXX_EXPORT void draw_rect_filled(const vec2d& min, const vec2d& max) const;
+    UXX_EXPORT void draw_rect_filled_multi_color(const vec2d& min, const vec2d& max, const color_rect& colors) const;
+    UXX_EXPORT void draw_quad(const vec2d& p1, const vec2d& p2, const vec2d& p3, const vec2d& p4) const;
+    UXX_EXPORT void draw_quad_filled(const vec2d& p1, const vec2d& p2, const vec2d& p3, const vec2d& p4) const;
+    UXX_EXPORT void draw_triangle(const vec2d& p1, const vec2d& p2, const vec2d& p3) const;
+    UXX_EXPORT void draw_triangle_filled(const vec2d& p1, const vec2d& p2, const vec2d& p3) const;
+    UXX_EXPORT void draw_circle(const vec2d& center, float radius) const;
+    UXX_EXPORT void draw_circle(const vec2d& center, float radius, int num_segments) const;
+    UXX_EXPORT void draw_circle_filled(const vec2d& center, float radius) const;
+    UXX_EXPORT void draw_circle_filled(const vec2d& center, float radius, int num_segments) const;
+    UXX_EXPORT void draw_ngon(const vec2d& center, float radius, int num_segments) const;
+    UXX_EXPORT void draw_ngon_filled(const vec2d& center, float radius, int num_segments) const;
+    UXX_EXPORT void draw_polyline(const std::vector<vec2d>& points, bool closed) const;
+    UXX_EXPORT void draw_convex_poly_filled(const std::vector<vec2d>& points) const;
+    UXX_EXPORT void draw_bezier_curve(const vec2d& p1, const vec2d& p2, const vec2d& p3, const vec2d& p4) const;
+    UXX_EXPORT void draw_bezier_curve(const vec2d& p1, const vec2d& p2, const vec2d& p3, const vec2d& p4, int num_segments) const;
+
+    // TODO: Draw text, images...
 
 private:
     std::any _draw_list;
     unsigned int _color;
     float _thickness;
     float _rounding;
+    corner_properties _corner_props;
 
     explicit pencil() noexcept;
 };
