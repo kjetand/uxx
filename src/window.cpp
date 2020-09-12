@@ -1,51 +1,5 @@
+#include "common.hpp"
 #include "uxx/uxx.hpp"
-
-#ifdef _WIN32
-#include <SFML/Graphics.hpp>
-#include <imgui-SFML.h>
-#include <imgui.h>
-#else
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wuseless-cast"
-#pragma GCC diagnostic ignored "-Wold-style-cast"
-#include <SFML/Graphics.hpp>
-#include <imgui-SFML.h>
-#include <imgui.h>
-#pragma GCC diagnostic pop
-#endif
-
-uxx::string_ref::string_ref(const std::string& str) noexcept
-    : _str(str.c_str())
-{
-}
-
-void uxx::app::mainloop(const std::function<void()>& render) const
-{
-    sf::RenderWindow w(sf::VideoMode(800, 600), "SFML window");
-    w.setVerticalSyncEnabled(true);
-    ImGui::SFML::Init(w);
-
-    sf::Event event {};
-    sf::Clock delta_clock {};
-
-    while (w.isOpen()) {
-        while (w.pollEvent(event)) {
-            if (event.type == sf::Event::Closed) {
-                w.close();
-            } else {
-                ImGui::SFML::ProcessEvent(event);
-            }
-        }
-        ImGui::SFML::Update(w, delta_clock.restart());
-        w.clear();
-        render();
-        ImGui::SFML::Render(w);
-
-        w.display();
-        sf::sleep(sf::milliseconds(10));
-    }
-    ImGui::SFML::Shutdown();
-}
 
 uxx::window::collapsed uxx::scene::begin_window(uxx::string_ref title, std::optional<std::reference_wrapper<bool>> open, uxx::window::properties properties) const
 {
@@ -255,43 +209,4 @@ void uxx::window::input_text(uxx::string_ref label, std::string& value) const
     const auto buf_size = value.capacity() + 1;
 
     ImGui::InputText(label, raw_value, buf_size, flags, string_appender, &value);
-}
-
-namespace {
-
-[[nodiscard]] ImDrawList& as_draw_list(const std::any& draw_list)
-{
-    return *std::any_cast<ImDrawList*>(draw_list);
-}
-
-}
-
-unsigned int uxx::rgb_color::to_color_u32() const noexcept
-{
-    return ImGui::GetColorU32(ImVec4 { r, g, b, 1.0f });
-}
-
-unsigned int uxx::rgba_color::to_color_u32() const noexcept
-{
-    return ImGui::GetColorU32(ImVec4 { r, g, b, a });
-}
-
-uxx::pencil::pencil() noexcept
-    : _draw_list(ImGui::GetWindowDrawList())
-{
-}
-
-void uxx::pencil::set_color(const uxx::rgb_color& color) noexcept
-{
-    _color = color.to_color_u32();
-}
-
-void uxx::pencil::set_color(const uxx::rgba_color& color) noexcept
-{
-    _color = color.to_color_u32();
-}
-
-void uxx::pencil::draw_line(const uxx::vec2d& from, const uxx::vec2d& to) const
-{
-    as_draw_list(_draw_list).AddLine({ from.x, from.y }, { to.x, to.y }, _color, _thickness);
 }

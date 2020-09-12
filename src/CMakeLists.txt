@@ -1,6 +1,10 @@
 add_definitions(-DBUILDING_UXX)
 
-add_library(${PROJECT_NAME} SHARED uxx.cpp)
+add_library(${PROJECT_NAME} SHARED
+        string_ref.cpp
+        app.cpp
+        window.cpp
+        pencil.cpp)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
         project_warnings
