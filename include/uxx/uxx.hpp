@@ -1,6 +1,7 @@
 #ifndef _UXX_HPP
 #define _UXX_HPP
 
+#include <any>
 #include <concepts>
 #include <functional>
 #include <optional>
@@ -51,6 +52,48 @@ private:
 
 template <typename F, typename... Args>
 concept function = std::is_invocable_v<F, Args...>;
+
+struct vec2d {
+    float x;
+    float y;
+};
+
+struct rgb_color {
+    float r;
+    float g;
+    float b;
+
+    [[nodiscard]] unsigned int to_color_u32() const noexcept;
+};
+
+struct rgba_color {
+    float r;
+    float g;
+    float b;
+    float a;
+
+    [[nodiscard]] unsigned int to_color_u32() const noexcept;
+};
+
+class pencil {
+    friend class window;
+
+public:
+    UXX_EXPORT ~pencil() noexcept = default;
+
+    UXX_EXPORT void set_color(const rgb_color& color) noexcept;
+    UXX_EXPORT void set_color(const rgba_color& color) noexcept;
+
+    UXX_EXPORT void draw_line(const vec2d& from, const vec2d& to) const;
+
+private:
+    std::any _draw_list;
+    unsigned int _color;
+    float _thickness;
+    float _rounding;
+
+    explicit pencil() noexcept;
+};
 
 class UXX_EXPORT window {
     friend class scene;
@@ -108,6 +151,8 @@ public:
     window& operator=(window&&) noexcept = default;
 
     [[nodiscard]] bool is_collapsed() const noexcept;
+
+    [[nodiscard]] pencil create_pencil() const noexcept;
 
     void label(string_ref text) const;
 
