@@ -14,9 +14,15 @@ void uxx::scene::end_window() const
     ImGui::End();
 }
 
+uxx::window::properties::properties() noexcept
+    : _flags(ImGuiWindowFlags_None)
+{
+    static_assert(std::is_same_v<decltype(_flags), ImGuiWindowFlags>);
+}
+
 constexpr uxx::window::properties::operator int() const noexcept
 {
-    return static_cast<int>(_flags);
+    return _flags;
 }
 
 uxx::window::properties uxx::window::properties::clear() noexcept
@@ -27,139 +33,139 @@ uxx::window::properties uxx::window::properties::clear() noexcept
 
 uxx::window::properties uxx::window::properties::set_no_title_bar() noexcept
 {
-    _flags |= static_cast<unsigned int>(ImGuiWindowFlags_NoTitleBar);
+    _flags |= ImGuiWindowFlags_NoTitleBar;
     return *this;
 }
 
 uxx::window::properties uxx::window::properties::set_no_resize() noexcept
 {
-    _flags |= static_cast<unsigned int>(ImGuiWindowFlags_NoResize);
+    _flags |= ImGuiWindowFlags_NoResize;
     return *this;
 }
 
 uxx::window::properties uxx::window::properties::set_no_move() noexcept
 {
-    _flags |= static_cast<unsigned int>(ImGuiWindowFlags_NoMove);
+    _flags |= ImGuiWindowFlags_NoMove;
     return *this;
 }
 
 uxx::window::properties uxx::window::properties::set_no_scrollbar() noexcept
 {
-    _flags |= static_cast<unsigned int>(ImGuiWindowFlags_NoScrollbar);
+    _flags |= ImGuiWindowFlags_NoScrollbar;
     return *this;
 }
 
 uxx::window::properties uxx::window::properties::set_no_scroll_with_mouse() noexcept
 {
-    _flags |= static_cast<unsigned int>(ImGuiWindowFlags_NoScrollWithMouse);
+    _flags |= ImGuiWindowFlags_NoScrollWithMouse;
     return *this;
 }
 
 uxx::window::properties uxx::window::properties::set_no_collapse() noexcept
 {
-    _flags |= static_cast<unsigned int>(ImGuiWindowFlags_NoCollapse);
+    _flags |= ImGuiWindowFlags_NoCollapse;
     return *this;
 }
 
 uxx::window::properties uxx::window::properties::set_always_auto_resize() noexcept
 {
-    _flags |= static_cast<unsigned int>(ImGuiWindowFlags_AlwaysAutoResize);
+    _flags |= ImGuiWindowFlags_AlwaysAutoResize;
     return *this;
 }
 
 uxx::window::properties uxx::window::properties::set_no_background() noexcept
 {
-    _flags |= static_cast<unsigned int>(ImGuiWindowFlags_NoBackground);
+    _flags |= ImGuiWindowFlags_NoBackground;
     return *this;
 }
 
 uxx::window::properties uxx::window::properties::set_no_saved_settings() noexcept
 {
-    _flags |= static_cast<unsigned int>(ImGuiWindowFlags_NoSavedSettings);
+    _flags |= ImGuiWindowFlags_NoSavedSettings;
     return *this;
 }
 
 uxx::window::properties uxx::window::properties::set_no_mouse_inputs() noexcept
 {
-    _flags |= static_cast<unsigned int>(ImGuiWindowFlags_NoMouseInputs);
+    _flags |= ImGuiWindowFlags_NoMouseInputs;
     return *this;
 }
 
 uxx::window::properties uxx::window::properties::set_menu_bar() noexcept
 {
-    _flags |= static_cast<unsigned int>(ImGuiWindowFlags_MenuBar);
+    _flags |= ImGuiWindowFlags_MenuBar;
     return *this;
 }
 
 uxx::window::properties uxx::window::properties::set_horizontal_scrollbar() noexcept
 {
-    _flags |= static_cast<unsigned int>(ImGuiWindowFlags_HorizontalScrollbar);
+    _flags |= ImGuiWindowFlags_HorizontalScrollbar;
     return *this;
 }
 
 uxx::window::properties uxx::window::properties::set_no_focus_on_appearing() noexcept
 {
-    _flags |= static_cast<unsigned int>(ImGuiWindowFlags_NoFocusOnAppearing);
+    _flags |= ImGuiWindowFlags_NoFocusOnAppearing;
     return *this;
 }
 
 uxx::window::properties uxx::window::properties::set_no_bring_to_front_on_focus() noexcept
 {
-    _flags |= static_cast<unsigned int>(ImGuiWindowFlags_NoBringToFrontOnFocus);
+    _flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
     return *this;
 }
 
 uxx::window::properties uxx::window::properties::set_always_vertical_scrollbar() noexcept
 {
-    _flags |= static_cast<unsigned int>(ImGuiWindowFlags_AlwaysVerticalScrollbar);
+    _flags |= ImGuiWindowFlags_AlwaysVerticalScrollbar;
     return *this;
 }
 
 uxx::window::properties uxx::window::properties::set_always_horizontal_scrollbar() noexcept
 {
-    _flags |= static_cast<unsigned int>(ImGuiWindowFlags_AlwaysHorizontalScrollbar);
+    _flags |= ImGuiWindowFlags_AlwaysHorizontalScrollbar;
     return *this;
 }
 
 uxx::window::properties uxx::window::properties::set_always_use_window_padding() noexcept
 {
-    _flags |= static_cast<unsigned int>(ImGuiWindowFlags_AlwaysUseWindowPadding);
+    _flags |= ImGuiWindowFlags_AlwaysUseWindowPadding;
     return *this;
 }
 
 uxx::window::properties uxx::window::properties::set_no_nav_inputs() noexcept
 {
-    _flags |= static_cast<unsigned int>(ImGuiWindowFlags_NoNavInputs);
+    _flags |= ImGuiWindowFlags_NoNavInputs;
     return *this;
 }
 
 uxx::window::properties uxx::window::properties::set_no_nav_focus() noexcept
 {
-    _flags |= static_cast<unsigned int>(ImGuiWindowFlags_NoNavFocus);
+    _flags |= ImGuiWindowFlags_NoNavFocus;
     return *this;
 }
 
 uxx::window::properties uxx::window::properties::set_unsaved_document() noexcept
 {
-    _flags |= static_cast<unsigned int>(ImGuiWindowFlags_UnsavedDocument);
+    _flags |= ImGuiWindowFlags_UnsavedDocument;
     return *this;
 }
 
 uxx::window::properties uxx::window::properties::set_no_nav() noexcept
 {
-    _flags |= static_cast<unsigned int>(ImGuiWindowFlags_NoNav);
+    _flags |= ImGuiWindowFlags_NoNav;
     return *this;
 }
 
 uxx::window::properties uxx::window::properties::set_no_decoration() noexcept
 {
-    _flags |= static_cast<unsigned int>(ImGuiWindowFlags_NoDecoration);
+    _flags |= ImGuiWindowFlags_NoDecoration;
     return *this;
 }
 
 uxx::window::properties uxx::window::properties::set_no_inputs() noexcept
 {
-    _flags |= static_cast<unsigned int>(ImGuiWindowFlags_NoInputs);
+    _flags |= ImGuiWindowFlags_NoInputs;
     return *this;
 }
 

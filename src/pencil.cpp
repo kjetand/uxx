@@ -46,6 +46,7 @@ unsigned int uxx::rgba_color::to_color_u32() const noexcept
 uxx::pencil::properties::properties() noexcept
     : _flags(ImDrawListFlags_None)
 {
+    static_assert(std::is_same_v<decltype(_flags), ImDrawListFlags>);
 }
 
 uxx::pencil::properties::operator int() const noexcept
@@ -76,6 +77,7 @@ uxx::pencil::properties uxx::pencil::properties::set_anti_aliased_fill() noexcep
 uxx::pencil::corner_properties::corner_properties() noexcept
     : _flags(ImDrawCornerFlags_None)
 {
+    static_assert(std::is_same_v<decltype(_flags), ImDrawCornerFlags>);
 }
 
 uxx::pencil::corner_properties::operator int() const noexcept

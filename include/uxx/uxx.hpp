@@ -182,7 +182,7 @@ public:
 
     class UXX_EXPORT properties {
     public:
-        explicit properties() noexcept = default;
+        explicit properties() noexcept;
         ~properties() noexcept = default;
 
         properties(const properties&) = default;
@@ -218,7 +218,7 @@ public:
         properties set_no_inputs() noexcept;
 
     private:
-        unsigned int _flags { 0 };
+        int _flags;
     };
 
     window(const window&) = delete;
