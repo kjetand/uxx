@@ -38,6 +38,12 @@ $ cmake --build .
 The above steps should apply to both Windows and Linux. However, on windows you may need to specify `cmake.exe` and
 run with explicit generator `$ cmake.exe -G "Visual Studio 16 2019" ..` instead of just `$ cmake.exe ..`.
 
+#### Build flags
+The following flags are optional with the `cmake` command.
+
+- `-DDISABLE_EXAMPLES` - Don't build examples.
+- `-DDISABLE_TESTS` - Don't build unit tests.
+
 ## License
 
 Licensed under the [MIT License](LICENSE).

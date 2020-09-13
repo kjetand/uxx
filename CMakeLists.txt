@@ -1,12 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 project(uxx CXX)
 
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-
 if (APPLE)
     message(FATAL_ERROR "OSX is currently not supported")
 endif ()
@@ -17,6 +11,11 @@ endif ()
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 add_library(project_warnings INTERFACE)
 
@@ -107,7 +106,11 @@ message(STATUS "OpenGL libraries: ${OPENGL_LIBRARIES}")
 
 add_subdirectory(ext)
 add_subdirectory(src)
-add_subdirectory(examples)
+if (NOT DISABLE_EXAMPLES)
+    add_subdirectory(examples)
+endif ()
 
-enable_testing()
-add_subdirectory(test)
+if (NOT DISABLE_TESTS)
+    enable_testing()
+    add_subdirectory(test)
+endif ()
