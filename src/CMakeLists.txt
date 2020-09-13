@@ -4,7 +4,10 @@ add_library(${PROJECT_NAME} SHARED
         string_ref.cpp
         app.cpp
         window.cpp
-        pencil.cpp)
+        pencil.cpp
+        tab_bar.cpp
+        mouse.cpp
+        popup.cpp)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
         project_warnings

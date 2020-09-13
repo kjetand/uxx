@@ -174,14 +174,55 @@ uxx::window::window(uxx::window::collapsed collapse) noexcept
 {
 }
 
+uxx::vec2d uxx::window::get_position() const
+{
+    const auto pos = ImGui::GetWindowPos();
+    return vec2d { pos.x, pos.y };
+}
+
+uxx::vec2d uxx::window::get_size() const
+{
+    const auto size = ImGui::GetWindowSize();
+    return vec2d { size.x, size.y };
+}
+uxx::vec2d uxx::window::get_cursor_screen_position() const
+{
+    const auto pos = ImGui::GetCursorScreenPos();
+    return { pos.x, pos.y };
+}
+uxx::vec2d uxx::window::get_available_content_region() const
+{
+    const auto pos = ImGui::GetContentRegionAvail();
+    return { pos.x, pos.y };
+}
+uxx::mouse uxx::window::get_mouse() const
+{
+    return mouse {};
+}
+
 uxx::pencil uxx::window::create_pencil() const noexcept
 {
     return uxx::pencil();
 }
 
+uxx::pencil uxx::window::create_pencil(uxx::pencil::type type) const noexcept
+{
+    return uxx::pencil(type);
+}
+
 bool uxx::window::is_collapsed() const noexcept
 {
     return _collapsed == collapsed::yes;
+}
+
+bool uxx::window::is_item_hovered() const
+{
+    return ImGui::IsItemHovered();
+}
+
+bool uxx::window::is_item_active() const
+{
+    return ImGui::IsItemActive();
 }
 
 void uxx::window::label(uxx::string_ref text) const
@@ -215,4 +256,41 @@ void uxx::window::input_text(uxx::string_ref label, std::string& value) const
     const auto buf_size = value.capacity() + 1;
 
     ImGui::InputText(label, raw_value, buf_size, flags, string_appender, &value);
+}
+
+void uxx::window::check_box(uxx::string_ref label, bool& value) const
+{
+    ImGui::Checkbox(label, &value);
+}
+
+void uxx::window::invisible_button(uxx::string_ref id, const uxx::vec2d& size)
+{
+    // TODO: Don't hard code mouse click flags
+    // TODO: Return "pressed"-bool?
+    ImGui::InvisibleButton(id, ImVec2 { size.x, size.y }, ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_MouseButtonRight);
+}
+
+void uxx::window::open_popup_context_item(uxx::string_ref id) const
+{
+    ImGui::OpenPopupContextItem(id);
+}
+
+uxx::popup::visible uxx::window::begin_popup(uxx::string_ref id) const
+{
+    return ImGui::BeginPopup(id) ? popup::visible::yes : popup::visible::no;
+}
+
+void uxx::window::end_popup() const
+{
+    ImGui::EndPopup();
+}
+
+void uxx::window::push_clip_rect(const uxx::vec2d& min, const uxx::vec2d& max, const bool intersect_with_current_clip_rect) const
+{
+    ImGui::PushClipRect({ min.x, min.y }, { max.x, max.y }, intersect_with_current_clip_rect);
+}
+
+void uxx::window::pop_clip_rect() const
+{
+    ImGui::PopClipRect();
 }

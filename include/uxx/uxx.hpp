@@ -21,6 +21,8 @@
 
 namespace uxx {
 
+class window;
+
 class UXX_EXPORT string_ref {
 public:
     string_ref() = delete;
@@ -59,34 +61,45 @@ struct vec2d {
     float y;
 };
 
-struct rgb_color {
+using color32 = unsigned int;
+
+struct UXX_EXPORT rgb_color {
     float r;
     float g;
     float b;
 
-    [[nodiscard]] unsigned int to_color_u32() const noexcept;
+    [[nodiscard]] color32 to_color32() const noexcept;
 };
 
-struct rgba_color {
+struct UXX_EXPORT rgba_color {
     float r;
     float g;
     float b;
     float a;
 
-    [[nodiscard]] unsigned int to_color_u32() const noexcept;
+    [[nodiscard]] color32 to_color32() const noexcept;
+
+    [[nodiscard]] static rgba_color from_integers(unsigned char r, unsigned char g, unsigned char b, unsigned char a) noexcept;
 };
+
+[[nodiscard]] rgba_color to_rgba_color(const color32 c) noexcept;
 
 struct color_rect {
     rgba_color upper_left;
     rgba_color upper_right;
     rgba_color bottom_right;
-    rgba_color& bottom_left;
+    rgba_color bottom_left;
 };
 
 class pencil {
     friend class window;
 
 public:
+    enum type {
+        window, // Default
+        background,
+        foreground
+    };
     class UXX_EXPORT properties {
     public:
         explicit properties() noexcept;
@@ -169,17 +182,102 @@ private:
     corner_properties _corner_props;
 
     explicit pencil() noexcept;
+    explicit pencil(type pencil_type) noexcept;
+};
+
+class UXX_EXPORT tab_bar {
+    friend class window;
+
+public:
+    tab_bar(const tab_bar&) = delete;
+    tab_bar(tab_bar&&) noexcept = default;
+    tab_bar& operator=(const tab_bar&) = delete;
+    tab_bar& operator=(tab_bar&&) noexcept = delete;
+
+    // TODO: Implement tab bar/item properties
+
+    template <typename F, typename... Args>
+    void item(string_ref label, F&& f, Args&&... args) const requires function<F, uxx::window&, Args...>
+    {
+        if (begin_tab_item(label)) {
+            f(_window, std::forward<Args>(args)...);
+            end_tab_item();
+        }
+    }
+
+private:
+    enum visible {
+        yes,
+        no
+    };
+
+    uxx::window& _window;
+
+    explicit tab_bar(uxx::window& w) noexcept;
+    ~tab_bar() noexcept = default;
+
+    [[nodiscard]] bool begin_tab_item(string_ref label) const;
+    void end_tab_item() const;
+};
+
+class UXX_EXPORT popup {
+    friend class window;
+
+public:
+    enum class visible {
+        yes,
+        no
+    };
+    ~popup() noexcept = default;
+
+    popup(const popup&) = delete;
+    popup(popup&&) noexcept = default;
+    popup& operator=(const popup&) = delete;
+    popup& operator=(popup&&) noexcept = default;
+
+    bool menu_item(string_ref label, bool enabled) const;
+
+private:
+    explicit popup() noexcept = default;
+};
+
+class mouse {
+    friend class window;
+
+public:
+    enum class button {
+        left,
+        right,
+        middle
+    };
+    ~mouse() noexcept = default;
+
+    mouse(const mouse&) = delete;
+    mouse(mouse&&) noexcept = default;
+    mouse& operator=(const mouse&) = delete;
+    mouse& operator=(mouse&&) noexcept = default;
+
+    [[nodiscard]] UXX_EXPORT float get_x() const;
+    [[nodiscard]] UXX_EXPORT float get_y() const;
+    [[nodiscard]] UXX_EXPORT float get_delta_x() const;
+    [[nodiscard]] UXX_EXPORT float get_delta_y() const;
+    [[nodiscard]] UXX_EXPORT vec2d get_drag_delta(button b) const;
+
+    [[nodiscard]] UXX_EXPORT bool is_clicked(button b) const noexcept;
+    [[nodiscard]] UXX_EXPORT bool is_down(button b) const noexcept;
+    [[nodiscard]] UXX_EXPORT bool is_released(button b) const noexcept;
+    [[nodiscard]] UXX_EXPORT bool is_dragging(button b, float lock_threshold) const noexcept;
+
+private:
+    std::any _io;
+
+    explicit mouse() noexcept;
 };
 
 class UXX_EXPORT window {
     friend class scene;
 
 public:
-    enum class collapsed {
-        yes,
-        no
-    };
-
     class UXX_EXPORT properties {
     public:
         explicit properties() noexcept;
@@ -226,23 +324,79 @@ public:
     window& operator=(const window&) = delete;
     window& operator=(window&&) noexcept = default;
 
-    [[nodiscard]] bool is_collapsed() const noexcept;
+    [[nodiscard]] vec2d get_position() const;
+    [[nodiscard]] vec2d get_size() const;
+    [[nodiscard]] vec2d get_cursor_screen_position() const; // TODO: Will probably be deprecated in ImGui
+    [[nodiscard]] vec2d get_available_content_region() const; // TODO: Will probably be deprecated in ImGui
+    [[nodiscard]] mouse get_mouse() const;
 
+    [[nodiscard]] bool is_collapsed() const noexcept;
+    [[nodiscard]] bool is_item_hovered() const;
+    [[nodiscard]] bool is_item_active() const;
+
+    // TODO: Rename to get_pencil?
     [[nodiscard]] pencil create_pencil() const noexcept;
+    [[nodiscard]] pencil create_pencil(pencil::type type) const noexcept;
 
     void label(string_ref text) const;
-
     bool button(string_ref text) const;
-
     void same_line() const;
-
     void input_text(string_ref label, std::string& value) const;
+    void check_box(string_ref label, bool& value) const;
+
+    // TODO: Refactor this when I understand what it does
+    void invisible_button(string_ref id, const vec2d& size);
+    void open_popup_context_item(string_ref id) const;
+
+    template <typename F, typename... Args>
+    void tab_bar(string_ref id, F&& f, Args&&... args) requires function<F, uxx::tab_bar&, Args...>
+    {
+        // TODO: Consider if user wants to be called even when tab bar is not visible
+        if (begin_tab_bar(id) == tab_bar::visible::yes) {
+            uxx::tab_bar tab_bar(*this);
+            f(tab_bar, std::forward<Args>(args)...);
+            end_tab_bar();
+        }
+    }
+
+    template <typename F, typename... Args>
+    void popup(string_ref id, F&& f, Args&&... args) requires function<F, uxx::popup&, Args...>
+    {
+        // TODO: Consider if user wants to be called even when tab bar is not visible
+        if (begin_popup(id) == popup::visible::yes) {
+            uxx::popup pu {};
+            f(pu, std::forward<Args>(args)...);
+            end_popup();
+        }
+    }
+
+    template <typename F, typename... Args>
+    void clip_rect(const vec2d& min, const vec2d& max, const bool intersect_with_current_clip_rect, F&& f, Args&&... args) requires function<F, uxx::window&, Args...>
+    {
+        push_clip_rect(min, max, intersect_with_current_clip_rect);
+        f(*this, std::forward<Args>(args)...);
+        pop_clip_rect();
+    }
 
 private:
+    enum class collapsed {
+        yes,
+        no
+    };
+
     collapsed _collapsed;
 
     explicit window(collapsed collapsed) noexcept;
     ~window() noexcept = default;
+
+    [[nodiscard]] tab_bar::visible begin_tab_bar(string_ref id) const;
+    void end_tab_bar() const;
+
+    [[nodiscard]] popup::visible begin_popup(string_ref id) const;
+    void end_popup() const;
+
+    void push_clip_rect(const vec2d& min, const vec2d& max, const bool intersect_with_current_clip_rect) const;
+    void pop_clip_rect() const;
 };
 
 class UXX_EXPORT scene {
@@ -279,7 +433,7 @@ private:
     template <typename F, typename... Args>
     void window_impl(string_ref title, std::optional<std::reference_wrapper<bool>> open, const window::properties properties, F&& f, Args&&... args) const requires function<F, uxx::window&, Args...>
     {
-        if (open && open->get()) {
+        if (!open.has_value() || (open.has_value() && open->get())) {
             const auto collapsed = begin_window(title, open, properties);
             {
                 uxx::window w { collapsed };

@@ -33,14 +33,28 @@ namespace {
 
 }
 
-unsigned int uxx::rgb_color::to_color_u32() const noexcept
+uxx::color32 uxx::rgb_color::to_color32() const noexcept
 {
     return ImGui::GetColorU32(ImVec4 { r, g, b, 1.0f });
 }
 
-unsigned int uxx::rgba_color::to_color_u32() const noexcept
+uxx::color32 uxx::rgba_color::to_color32() const noexcept
 {
     return ImGui::GetColorU32(ImVec4 { r, g, b, a });
+}
+
+uxx::rgba_color uxx::rgba_color::from_integers(unsigned char r, unsigned char g, unsigned char b, unsigned char a) noexcept
+{
+    //TODO: Implement IM_COL32 with modern C++
+#ifdef _WIN32
+    const auto rgba = ImGui::ColorConvertU32ToFloat4(IM_COL32(r, g, b, a));
+#else
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+    const auto rgba = ImGui::ColorConvertU32ToFloat4(IM_COL32(r, g, b, a));
+#pragma GCC diagnostic pop
+#endif
+    return { rgba.x, rgba.y, rgba.z, rgba.w };
 }
 
 uxx::pencil::properties::properties() noexcept
@@ -116,7 +130,25 @@ uxx::pencil::corner_properties uxx::pencil::corner_properties::set_all() noexcep
 }
 
 uxx::pencil::pencil() noexcept
-    : _draw_list(ImGui::GetWindowDrawList())
+    : pencil(type::window)
+{
+}
+
+static auto get_draw_list(const uxx::pencil::type type) noexcept
+{
+    switch (type) {
+    case uxx::pencil::background:
+        return ImGui::GetBackgroundDrawList();
+    case uxx::pencil::foreground:
+        return ImGui::GetForegroundDrawList();
+    case uxx::pencil::window:
+    default:
+        return ImGui::GetWindowDrawList();
+    }
+}
+
+uxx::pencil::pencil(const uxx::pencil::type pencil_type) noexcept
+    : _draw_list(get_draw_list(pencil_type))
     , _color(ImGui::GetColorU32({ 1.0f, 1.0f, 1.0f, 1.0f }))
     , _thickness(1.0f)
     , _rounding(0.0f)
@@ -125,12 +157,12 @@ uxx::pencil::pencil() noexcept
 
 void uxx::pencil::set_color(const uxx::rgb_color& color) noexcept
 {
-    _color = color.to_color_u32();
+    _color = color.to_color32();
 }
 
 void uxx::pencil::set_color(const uxx::rgba_color& color) noexcept
 {
-    _color = color.to_color_u32();
+    _color = color.to_color32();
 }
 
 void uxx::pencil::set_properties(const uxx::pencil::properties& props) noexcept
@@ -170,7 +202,7 @@ void uxx::pencil::draw_rect_filled(const uxx::vec2d& min, const uxx::vec2d& max)
 
 void uxx::pencil::draw_rect_filled_multi_color(const uxx::vec2d& min, const uxx::vec2d& max, const uxx::color_rect& colors) const
 {
-    cast_draw_list(_draw_list).AddRectFilledMultiColor(from_vec2d(min), from_vec2d(max), colors.upper_left.to_color_u32(), colors.upper_right.to_color_u32(), colors.bottom_right.to_color_u32(), colors.bottom_left.to_color_u32());
+    cast_draw_list(_draw_list).AddRectFilledMultiColor(from_vec2d(min), from_vec2d(max), colors.upper_left.to_color32(), colors.upper_right.to_color32(), colors.bottom_right.to_color32(), colors.bottom_left.to_color32());
 }
 
 void uxx::pencil::draw_quad(const uxx::vec2d& p1, const uxx::vec2d& p2, const uxx::vec2d& p3, const uxx::vec2d& p4) const
