@@ -294,3 +294,57 @@ void uxx::window::pop_clip_rect() const
 {
     ImGui::PopClipRect();
 }
+void uxx::window::push_item_width(float width) const
+{
+    ImGui::PushItemWidth(width);
+}
+
+void uxx::window::pop_item_width() const
+{
+    ImGui::PopItemWidth();
+}
+
+float uxx::window::get_font_size() const
+{
+    return ImGui::GetFontSize();
+}
+
+float uxx::window::calc_item_width() const
+{
+    return ImGui::CalcItemWidth();
+}
+
+float uxx::window::get_frame_height() const
+{
+    return ImGui::GetFrameHeight();
+}
+
+void uxx::window::drag_float(uxx::string_ref label, float& value, float v_speed, float v_min, float v_max, uxx::string_ref format) const
+{
+    ImGui::DragFloat(label, &value, v_speed, v_min, v_max, format);
+}
+
+bool uxx::window::slider_int(uxx::string_ref label, int& value, int v_min, int v_max) const
+{
+    return ImGui::SliderInt(label, &value, v_min, v_max);
+}
+
+void uxx::window::color_edit_4(uxx::string_ref label, float* color) const
+{
+    ImGui::ColorEdit4(label, color);
+}
+
+void uxx::window::dummy(const uxx::vec2d& size) const
+{
+    ImGui::Dummy({ size.x, size.y });
+}
+
+void uxx::window::same_line(float offset_from_start_x, float spacing_w) const
+{
+    ImGui::SameLine(offset_from_start_x, spacing_w);
+}
+uxx::vec2d uxx::window::get_item_inner_spacing() const
+{
+    const auto inner_spacing = ImGui::GetStyle().ItemInnerSpacing;
+    return { inner_spacing.x, inner_spacing.y };
+}

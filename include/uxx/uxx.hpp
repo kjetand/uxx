@@ -347,6 +347,19 @@ public:
     // TODO: Refactor this when I understand what it does
     void invisible_button(string_ref id, const vec2d& size);
     void open_popup_context_item(string_ref id) const;
+    void push_item_width(float width) const;
+    void pop_item_width() const;
+    [[nodiscard]] float get_font_size() const;
+    [[nodiscard]] float calc_item_width() const;
+    [[nodiscard]] float get_frame_height() const;
+    void drag_float(string_ref label, float& value, float v_speed, float v_min, float v_max, string_ref format) const;
+    bool slider_int(string_ref label, int& value, int v_min, int v_max) const;
+    void color_edit_4(string_ref label, float color[4]) const;
+    void dummy(const vec2d& size) const;
+    void same_line(float offset_from_start_x, float spacing_w) const;
+
+    // TODO: Part of imgui style (needs refactoring)
+    [[nodiscard]] vec2d get_item_inner_spacing() const;
 
     template <typename F, typename... Args>
     void tab_bar(string_ref id, F&& f, Args&&... args) requires function<F, uxx::tab_bar&, Args...>
