@@ -7,7 +7,8 @@ add_library(${PROJECT_NAME} SHARED
         pencil.cpp
         tab_bar.cpp
         mouse.cpp
-        popup.cpp)
+        popup.cpp
+        canvas.cpp)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
         project_warnings

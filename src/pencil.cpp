@@ -33,61 +33,6 @@ namespace {
 
 }
 
-uxx::color32 uxx::rgb_color::to_color32() const noexcept
-{
-    return ImGui::GetColorU32(ImVec4 { r, g, b, 1.0f });
-}
-
-uxx::color32 uxx::rgba_color::to_color32() const noexcept
-{
-    return ImGui::GetColorU32(ImVec4 { r, g, b, a });
-}
-
-uxx::rgba_color uxx::rgba_color::from_integers(unsigned char r, unsigned char g, unsigned char b, unsigned char a) noexcept
-{
-    //TODO: Implement IM_COL32 with modern C++
-#ifdef _WIN32
-    const auto rgba = ImGui::ColorConvertU32ToFloat4(IM_COL32(r, g, b, a));
-#else
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wold-style-cast"
-    const auto rgba = ImGui::ColorConvertU32ToFloat4(IM_COL32(r, g, b, a));
-#pragma GCC diagnostic pop
-#endif
-    return { rgba.x, rgba.y, rgba.z, rgba.w };
-}
-
-uxx::pencil::properties::properties() noexcept
-    : _flags(ImDrawListFlags_None)
-{
-    static_assert(std::is_same_v<decltype(_flags), ImDrawListFlags>);
-}
-
-uxx::pencil::properties::operator int() const noexcept
-{
-    return _flags;
-}
-uxx::pencil::properties uxx::pencil::properties::clear() noexcept
-{
-    _flags |= ImDrawListFlags_None;
-    return *this;
-}
-uxx::pencil::properties uxx::pencil::properties::set_anti_aliased_lines() noexcept
-{
-    _flags |= ImDrawListFlags_AntiAliasedLines;
-    return *this;
-}
-uxx::pencil::properties uxx::pencil::properties::set_anti_aliased_lines_using_textures() noexcept
-{
-    _flags |= ImDrawListFlags_AntiAliasedLinesUseTex;
-    return *this;
-}
-uxx::pencil::properties uxx::pencil::properties::set_anti_aliased_fill() noexcept
-{
-    _flags |= ImDrawListFlags_AntiAliasedFill;
-    return *this;
-}
-
 uxx::pencil::corner_properties::corner_properties() noexcept
     : _flags(ImDrawCornerFlags_None)
 {
@@ -153,6 +98,7 @@ uxx::pencil::pencil(const uxx::pencil::type pencil_type) noexcept
     , _thickness(1.0f)
     , _rounding(0.0f)
 {
+    cast_draw_list(_draw_list).Flags = ImDrawListFlags_None | ImDrawListFlags_AntiAliasedLines | ImDrawListFlags_AntiAliasedFill;
 }
 
 void uxx::pencil::set_color(const uxx::rgb_color& color) noexcept
@@ -163,11 +109,6 @@ void uxx::pencil::set_color(const uxx::rgb_color& color) noexcept
 void uxx::pencil::set_color(const uxx::rgba_color& color) noexcept
 {
     _color = color.to_color32();
-}
-
-void uxx::pencil::set_properties(const uxx::pencil::properties& props) noexcept
-{
-    cast_draw_list(_draw_list).Flags = static_cast<int>(props);
 }
 
 void uxx::pencil::set_corner_properties(const corner_properties& corner_props) noexcept
@@ -275,4 +216,14 @@ void uxx::pencil::draw_bezier_curve(const uxx::vec2d& p1, const uxx::vec2d& p2, 
 void uxx::pencil::draw_bezier_curve(const uxx::vec2d& p1, const uxx::vec2d& p2, const uxx::vec2d& p3, const uxx::vec2d& p4, int num_segments) const
 {
     cast_draw_list(_draw_list).AddBezierCurve(from_vec2d(p1), from_vec2d(p2), from_vec2d(p3), from_vec2d(p4), _color, _thickness, num_segments);
+}
+
+void uxx::pencil::push_clip_rect(const uxx::vec2d& min, const uxx::vec2d& max, const bool intersect_with_current_clip_rect) const
+{
+    ImGui::PushClipRect({ min.x, min.y }, { max.x, max.y }, intersect_with_current_clip_rect);
+}
+
+void uxx::pencil::pop_clip_rect() const
+{
+    ImGui::PopClipRect();
 }

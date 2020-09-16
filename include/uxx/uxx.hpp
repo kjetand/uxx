@@ -63,12 +63,22 @@ struct vec2d {
 
 using color32 = unsigned int;
 
+[[nodiscard]] constexpr std::uint8_t color_float_to_uint8(const float f) noexcept
+{
+    const auto saturated_f = (f < 0.0f) ? 0.0f : (f > 1.0f) ? 1.0f
+                                                            : f;
+    return static_cast<std::uint8_t>(saturated_f * 255.0f + 0.5f);
+}
+
 struct UXX_EXPORT rgb_color {
     float r;
     float g;
     float b;
 
-    [[nodiscard]] color32 to_color32() const noexcept;
+    [[nodiscard]] constexpr color32 to_color32() const noexcept
+    {
+        return static_cast<color32>((color_float_to_uint8(r) << 0) | (color_float_to_uint8(g) << 8) | (color_float_to_uint8(b) << 16) | (color_float_to_uint8(1.0f) << 24));
+    }
 };
 
 struct UXX_EXPORT rgba_color {
@@ -77,12 +87,28 @@ struct UXX_EXPORT rgba_color {
     float b;
     float a;
 
-    [[nodiscard]] color32 to_color32() const noexcept;
+    [[nodiscard]] constexpr color32 to_color32() const noexcept
+    {
+        return static_cast<color32>((color_float_to_uint8(r) << 0) | (color_float_to_uint8(g) << 8) | (color_float_to_uint8(b) << 16) | (color_float_to_uint8(a) << 24));
+    }
 
-    [[nodiscard]] static rgba_color from_integers(unsigned char r, unsigned char g, unsigned char b, unsigned char a) noexcept;
+    [[nodiscard]] static constexpr color32 to_color32(const std::uint8_t r, const std::uint8_t g, const std::uint8_t b, const std::uint8_t a) noexcept
+    {
+        return static_cast<color32>((a << 24) | (b << 16) | (g << 8) | (r << 0));
+    }
+
+    [[nodiscard]] static constexpr rgba_color from_integers(const std::uint8_t r, const std::uint8_t g, const std::uint8_t b, const std::uint8_t a) noexcept
+    {
+        const auto c32 = to_color32(r, g, b, a);
+        constexpr float s = 1.0f / 255.0f;
+        return rgba_color {
+            static_cast<float>((c32 >> 0) & 0xFF) * s,
+            static_cast<float>((c32 >> 8) & 0xFF) * s,
+            static_cast<float>((c32 >> 16) & 0xFF) * s,
+            static_cast<float>((c32 >> 24) & 0xFF) * s
+        };
+    }
 };
-
-[[nodiscard]] rgba_color to_rgba_color(const color32 c) noexcept;
 
 struct color_rect {
     rgba_color upper_left;
@@ -99,26 +125,6 @@ public:
         window, // Default
         background,
         foreground
-    };
-    class UXX_EXPORT properties {
-    public:
-        explicit properties() noexcept;
-        ~properties() noexcept = default;
-
-        properties(const properties&) = default;
-        properties(properties&&) noexcept = default;
-        properties& operator=(const properties&) = default;
-        properties& operator=(properties&&) noexcept = default;
-
-        [[nodiscard]] explicit operator int() const noexcept;
-
-        properties clear() noexcept;
-        properties set_anti_aliased_lines() noexcept;
-        properties set_anti_aliased_lines_using_textures() noexcept;
-        properties set_anti_aliased_fill() noexcept;
-
-    private:
-        int _flags;
     };
 
     class UXX_EXPORT corner_properties {
@@ -150,7 +156,6 @@ public:
     UXX_EXPORT void set_color(const rgba_color& color) noexcept;
     UXX_EXPORT void set_thickness(float thickness) noexcept;
     UXX_EXPORT void set_rounding(float rounding) noexcept;
-    UXX_EXPORT void set_properties(const properties& props) noexcept;
     UXX_EXPORT void set_corner_properties(const corner_properties& corner_props) noexcept;
 
     UXX_EXPORT void draw_line(const vec2d& from, const vec2d& to) const;
@@ -174,6 +179,14 @@ public:
 
     // TODO: Draw text, images...
 
+    template <typename F, typename... Args>
+    void clip_rectangle(const vec2d& min, const vec2d& max, F&& f, Args&&... args) requires function<F, uxx::pencil&, Args...>
+    {
+        push_clip_rect(min, max, false);
+        f(*this, std::forward<Args>(args)...);
+        pop_clip_rect();
+    }
+
 private:
     std::any _draw_list;
     unsigned int _color;
@@ -183,6 +196,9 @@ private:
 
     explicit pencil() noexcept;
     explicit pencil(type pencil_type) noexcept;
+
+    UXX_EXPORT void push_clip_rect(const vec2d& min, const vec2d& max, const bool intersect_with_current_clip_rect) const;
+    UXX_EXPORT void pop_clip_rect() const;
 };
 
 class UXX_EXPORT tab_bar {
@@ -221,7 +237,7 @@ private:
 };
 
 class UXX_EXPORT popup {
-    friend class window;
+    friend class canvas;
 
 public:
     enum class visible {
@@ -243,6 +259,7 @@ private:
 
 class mouse {
     friend class window;
+    friend class canvas;
 
 public:
     enum class button {
@@ -272,6 +289,61 @@ private:
     std::any _io;
 
     explicit mouse() noexcept;
+};
+
+class UXX_EXPORT canvas {
+    friend class window;
+
+public:
+    ~canvas() noexcept = default;
+
+    canvas(const canvas&) = delete;
+    canvas(canvas&&) noexcept = default;
+    canvas& operator=(const canvas&) = delete;
+    canvas& operator=(canvas&&) noexcept = default;
+
+    /// \return Mouse interaction object for the current window.
+    [[nodiscard]] mouse get_mouse() const;
+    /// \return Position of the canvas relative to the application screen.
+    [[nodiscard]] vec2d get_position() const;
+    /// \return Size of the canvas.
+    [[nodiscard]] vec2d get_size() const;
+    /// \return True if canvas is hovered by mouse.
+    [[nodiscard]] bool is_hovered() const;
+    /// \return True if canvas is active by mouse interaction.
+    [[nodiscard]] bool is_active() const;
+
+    /// Show popup menu.
+    /// \tparam F User provided callback type that is required to take a uxx::popup reference and optionally user provided argument types
+    /// \tparam Args User provided argument types that will be required by 'F'
+    /// \param id Identifier of this popup menu
+    /// \param f User provided callback
+    /// \param args Optional user provided arguments that are yielded to 'f'
+    template <typename F, typename... Args>
+    void popup(string_ref id, F&& f, Args&&... args) requires function<F, uxx::popup&, Args...>
+    {
+        auto mouse = get_mouse();
+        const auto drag_delta = mouse.get_drag_delta(uxx::mouse::button::right);
+
+        if (mouse.is_released(uxx::mouse::button::right) && drag_delta.x == 0.0f && drag_delta.y == 0.0f) {
+            open_popup_context_item(id);
+        }
+        if (begin_popup(id) == popup::visible::yes) {
+            uxx::popup pu {};
+            f(pu, std::forward<Args>(args)...);
+            end_popup();
+        }
+    }
+
+private:
+    vec2d _position;
+    vec2d _size;
+
+    explicit canvas(const vec2d& position, const vec2d& size) noexcept;
+
+    [[nodiscard]] popup::visible begin_popup(string_ref id) const;
+    void end_popup() const;
+    void open_popup_context_item(string_ref id) const;
 };
 
 class UXX_EXPORT window {
@@ -324,71 +396,85 @@ public:
     window& operator=(const window&) = delete;
     window& operator=(window&&) noexcept = default;
 
+    /// \return Position of the current window relative to the application screen.
     [[nodiscard]] vec2d get_position() const;
+    /// \return Size of entire window.
     [[nodiscard]] vec2d get_size() const;
-    [[nodiscard]] vec2d get_cursor_screen_position() const; // TODO: Will probably be deprecated in ImGui
-    [[nodiscard]] vec2d get_available_content_region() const; // TODO: Will probably be deprecated in ImGui
+    /// \return Size of entire content size of window (window size minus padding, borders etc.).
+    [[nodiscard]] vec2d get_content_size() const;
+    /// \return Position for the current cursor (where the next item will be placed) relative to the application screen.
+    [[nodiscard]] vec2d get_cursor_screen_position() const;
+    /// \return Mouse interaction object for the current window.
     [[nodiscard]] mouse get_mouse() const;
 
+    /// \return True if current window is collapsed.
     [[nodiscard]] bool is_collapsed() const noexcept;
+    /// \return True if the last item added is hovered by the mouse.
     [[nodiscard]] bool is_item_hovered() const;
+    /// \return True if the last item added is active (e.g. pressed, edited, etc.).
     [[nodiscard]] bool is_item_active() const;
 
-    // TODO: Rename to get_pencil?
+    /// \return Drawing API for the window canvas.
     [[nodiscard]] pencil create_pencil() const noexcept;
-    [[nodiscard]] pencil create_pencil(pencil::type type) const noexcept;
+    /// \return Drawing API for the application foreground (drawn last for each frame).
+    [[nodiscard]] pencil create_pencil_foreground() const noexcept;
+    /// \return Drawing API for the application background (drawn first for each frame).
+    [[nodiscard]] pencil create_pencil_background() const noexcept;
 
+    /// Adds a text label to the current window.
     void label(string_ref text) const;
+    /// Adds a clickable button to the current window.
+    /// \return True if button is clicked.
     bool button(string_ref text) const;
+    /// Adds an invisible area to the current window.
+    void empty_space(const vec2d& size) const;
+    /// Enforce that next item will be placed on the same line as the previous added item.
     void same_line() const;
+    /// Add input text field to the current window.
+    /// \param label A label added before the input text field.
+    /// \param value Storage for the input text.
     void input_text(string_ref label, std::string& value) const;
-    void check_box(string_ref label, bool& value) const;
+    /// Adds a checkbox to the current window.
+    /// \param label A label added after the checkbox.
+    /// \param value Storage for the current checked-value.
+    void checkbox(string_ref label, bool& value) const;
+    /// Show color picker.
+    /// \param label Text label for the color picker
+    /// \param color Storage of the current picked color
+    void color_picker(string_ref label, rgba_color& color) const;
+    /// Add slider (float) to the current window.
+    /// \param label Text label added to the right of the slider.
+    /// \param value Storage for current slider value.
+    /// \param value_min Minimum allowed value.
+    /// \param value_max Maximum allowed value.
+    /// \return True if value is changed.
+    bool slider_float(string_ref label, float& value, float value_min, float value_max) const;
+    /// Add slider (integer) to the current window.
+    /// \param label Text label added to the right of the slider.
+    /// \param value Storage for current slider value.
+    /// \param value_min Minimum allowed value.
+    /// \param value_max Maximum allowed value.
+    /// \return True if value is changed.
+    bool slider_int(string_ref label, int& value, int value_min, int value_max) const;
 
-    // TODO: Refactor this when I understand what it does
-    void invisible_button(string_ref id, const vec2d& size);
-    void open_popup_context_item(string_ref id) const;
-    void push_item_width(float width) const;
-    void pop_item_width() const;
-    [[nodiscard]] float get_font_size() const;
-    [[nodiscard]] float calc_item_width() const;
-    [[nodiscard]] float get_frame_height() const;
-    void drag_float(string_ref label, float& value, float v_speed, float v_min, float v_max, string_ref format) const;
-    bool slider_int(string_ref label, int& value, int v_min, int v_max) const;
-    void color_edit_4(string_ref label, float color[4]) const;
-    void dummy(const vec2d& size) const;
-    void same_line(float offset_from_start_x, float spacing_w) const;
-
-    // TODO: Part of imgui style (needs refactoring)
-    [[nodiscard]] vec2d get_item_inner_spacing() const;
+    template <typename F, typename... Args>
+    void canvas(string_ref id, const vec2d& size, F&& f, Args&&... args) requires function<F, uxx::canvas&, uxx::pencil&, Args...>
+    {
+        const auto position = get_cursor_screen_position();
+        invisible_button(id, size);
+        uxx::canvas c(position, size);
+        auto pencil = create_pencil();
+        f(c, pencil, std::forward<Args>(args)...);
+    }
 
     template <typename F, typename... Args>
     void tab_bar(string_ref id, F&& f, Args&&... args) requires function<F, uxx::tab_bar&, Args...>
     {
-        // TODO: Consider if user wants to be called even when tab bar is not visible
         if (begin_tab_bar(id) == tab_bar::visible::yes) {
             uxx::tab_bar tab_bar(*this);
             f(tab_bar, std::forward<Args>(args)...);
             end_tab_bar();
         }
-    }
-
-    template <typename F, typename... Args>
-    void popup(string_ref id, F&& f, Args&&... args) requires function<F, uxx::popup&, Args...>
-    {
-        // TODO: Consider if user wants to be called even when tab bar is not visible
-        if (begin_popup(id) == popup::visible::yes) {
-            uxx::popup pu {};
-            f(pu, std::forward<Args>(args)...);
-            end_popup();
-        }
-    }
-
-    template <typename F, typename... Args>
-    void clip_rect(const vec2d& min, const vec2d& max, const bool intersect_with_current_clip_rect, F&& f, Args&&... args) requires function<F, uxx::window&, Args...>
-    {
-        push_clip_rect(min, max, intersect_with_current_clip_rect);
-        f(*this, std::forward<Args>(args)...);
-        pop_clip_rect();
     }
 
 private:
@@ -404,12 +490,7 @@ private:
 
     [[nodiscard]] tab_bar::visible begin_tab_bar(string_ref id) const;
     void end_tab_bar() const;
-
-    [[nodiscard]] popup::visible begin_popup(string_ref id) const;
-    void end_popup() const;
-
-    void push_clip_rect(const vec2d& min, const vec2d& max, const bool intersect_with_current_clip_rect) const;
-    void pop_clip_rect() const;
+    void invisible_button(string_ref id, const vec2d& size) const;
 };
 
 class UXX_EXPORT scene {

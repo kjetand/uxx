@@ -190,7 +190,7 @@ uxx::vec2d uxx::window::get_cursor_screen_position() const
     const auto pos = ImGui::GetCursorScreenPos();
     return { pos.x, pos.y };
 }
-uxx::vec2d uxx::window::get_available_content_region() const
+uxx::vec2d uxx::window::get_content_size() const
 {
     const auto pos = ImGui::GetContentRegionAvail();
     return { pos.x, pos.y };
@@ -202,12 +202,17 @@ uxx::mouse uxx::window::get_mouse() const
 
 uxx::pencil uxx::window::create_pencil() const noexcept
 {
-    return uxx::pencil();
+    return pencil();
 }
 
-uxx::pencil uxx::window::create_pencil(uxx::pencil::type type) const noexcept
+uxx::pencil uxx::window::create_pencil_foreground() const noexcept
 {
-    return uxx::pencil(type);
+    return pencil(pencil::type::foreground);
+}
+
+uxx::pencil uxx::window::create_pencil_background() const noexcept
+{
+    return pencil(pencil::type::background);
 }
 
 bool uxx::window::is_collapsed() const noexcept
@@ -258,93 +263,34 @@ void uxx::window::input_text(uxx::string_ref label, std::string& value) const
     ImGui::InputText(label, raw_value, buf_size, flags, string_appender, &value);
 }
 
-void uxx::window::check_box(uxx::string_ref label, bool& value) const
+void uxx::window::checkbox(uxx::string_ref label, bool& value) const
 {
     ImGui::Checkbox(label, &value);
 }
 
-void uxx::window::invisible_button(uxx::string_ref id, const uxx::vec2d& size)
+bool uxx::window::slider_float(uxx::string_ref label, float& value, const float value_min, const float value_max) const
+{
+    return ImGui::SliderFloat(label, &value, value_min, value_max, "%.02f");
+}
+
+bool uxx::window::slider_int(uxx::string_ref label, int& value, const int value_min, const int value_max) const
+{
+    return ImGui::SliderInt(label, &value, value_min, value_max);
+}
+
+void uxx::window::color_picker(uxx::string_ref label, rgba_color& color) const
+{
+    ImGui::ColorEdit4(label, &color.r);
+}
+
+void uxx::window::invisible_button(uxx::string_ref id, const uxx::vec2d& size) const
 {
     // TODO: Don't hard code mouse click flags
     // TODO: Return "pressed"-bool?
     ImGui::InvisibleButton(id, ImVec2 { size.x, size.y }, ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_MouseButtonRight);
 }
 
-void uxx::window::open_popup_context_item(uxx::string_ref id) const
-{
-    ImGui::OpenPopupContextItem(id);
-}
-
-uxx::popup::visible uxx::window::begin_popup(uxx::string_ref id) const
-{
-    return ImGui::BeginPopup(id) ? popup::visible::yes : popup::visible::no;
-}
-
-void uxx::window::end_popup() const
-{
-    ImGui::EndPopup();
-}
-
-void uxx::window::push_clip_rect(const uxx::vec2d& min, const uxx::vec2d& max, const bool intersect_with_current_clip_rect) const
-{
-    ImGui::PushClipRect({ min.x, min.y }, { max.x, max.y }, intersect_with_current_clip_rect);
-}
-
-void uxx::window::pop_clip_rect() const
-{
-    ImGui::PopClipRect();
-}
-void uxx::window::push_item_width(float width) const
-{
-    ImGui::PushItemWidth(width);
-}
-
-void uxx::window::pop_item_width() const
-{
-    ImGui::PopItemWidth();
-}
-
-float uxx::window::get_font_size() const
-{
-    return ImGui::GetFontSize();
-}
-
-float uxx::window::calc_item_width() const
-{
-    return ImGui::CalcItemWidth();
-}
-
-float uxx::window::get_frame_height() const
-{
-    return ImGui::GetFrameHeight();
-}
-
-void uxx::window::drag_float(uxx::string_ref label, float& value, float v_speed, float v_min, float v_max, uxx::string_ref format) const
-{
-    ImGui::DragFloat(label, &value, v_speed, v_min, v_max, format);
-}
-
-bool uxx::window::slider_int(uxx::string_ref label, int& value, int v_min, int v_max) const
-{
-    return ImGui::SliderInt(label, &value, v_min, v_max);
-}
-
-void uxx::window::color_edit_4(uxx::string_ref label, float* color) const
-{
-    ImGui::ColorEdit4(label, color);
-}
-
-void uxx::window::dummy(const uxx::vec2d& size) const
+void uxx::window::empty_space(const uxx::vec2d& size) const
 {
     ImGui::Dummy({ size.x, size.y });
-}
-
-void uxx::window::same_line(float offset_from_start_x, float spacing_w) const
-{
-    ImGui::SameLine(offset_from_start_x, spacing_w);
-}
-uxx::vec2d uxx::window::get_item_inner_spacing() const
-{
-    const auto inner_spacing = ImGui::GetStyle().ItemInnerSpacing;
-    return { inner_spacing.x, inner_spacing.y };
 }
