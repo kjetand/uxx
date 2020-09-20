@@ -1,7 +1,8 @@
 add_executable(unit_tests
         main.cpp
         string_ref_test.cpp
-        color_test.cpp)
+        color_test.cpp
+        explicit_arg_test.cpp)
 
 target_include_directories(unit_tests PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}

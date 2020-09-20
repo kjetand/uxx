@@ -23,6 +23,66 @@ namespace uxx {
 
 class window;
 
+template <typename T, typename Tag>
+class explicit_arg {
+public:
+    explicit explicit_arg() noexcept(std::is_nothrow_default_constructible_v<T>) requires std::is_default_constructible_v<T> { }
+    explicit explicit_arg(const T& value) noexcept(std::is_nothrow_copy_constructible_v<T>) requires std::is_copy_constructible_v<T> : _value(value) { }
+    explicit explicit_arg(T&& value) noexcept(std::is_nothrow_move_constructible_v<T>) requires std::is_move_constructible_v<T> : _value(std::move(value)) { }
+
+    ~explicit_arg() noexcept(std::is_nothrow_destructible_v<T>) = default;
+
+    explicit_arg(const explicit_arg<T, Tag>&) noexcept(std::is_nothrow_copy_constructible_v<T>) requires std::is_copy_constructible_v<T> = default;
+    explicit_arg(explicit_arg<T, Tag>&&) noexcept(std::is_nothrow_move_constructible_v<T>) requires std::is_move_constructible_v<T> = default;
+    explicit_arg<T, Tag>& operator=(const explicit_arg<T, Tag>&) noexcept(std::is_nothrow_copy_assignable_v<T>) requires std::is_copy_assignable_v<T> = default;
+    explicit_arg<T, Tag>& operator=(explicit_arg<T, Tag>&&) noexcept(std::is_nothrow_move_assignable_v<T>) requires std::is_move_assignable_v<T> = default;
+
+    explicit_arg<T, Tag>& operator=(const T& value) noexcept(std::is_nothrow_copy_assignable_v<T>) requires(std::is_copy_assignable_v<T> && !std::is_const_v<T>)
+    {
+        _value = value;
+        return *this;
+    }
+
+    explicit_arg<T, Tag>& operator=(T&& value) noexcept(std::is_nothrow_move_assignable_v<T>) requires(std::is_move_assignable_v<T> && !std::is_const_v<T>)
+    {
+        _value = std::move(value);
+        return *this;
+    }
+
+    operator T() const requires(std::integral<T> || std::floating_point<T>)
+    {
+        return _value;
+    }
+
+    [[nodiscard]] T get() const noexcept(std::is_nothrow_copy_constructible_v<T>) requires(!std::is_reference_v<T>)
+    {
+        return _value;
+    }
+
+    [[nodiscard]] const std::remove_reference_t<T>& get() const noexcept
+    {
+        return _value;
+    }
+
+    [[nodiscard]] std::remove_reference_t<T>& get() noexcept requires(!std::is_const_v<T>)
+    {
+        return _value;
+    }
+
+    [[nodiscard]] bool operator==(const T& other) const requires std::equality_comparable<T>
+    {
+        return _value == other;
+    }
+
+    [[nodiscard]] bool operator==(const explicit_arg<T, Tag>& other) const requires std::equality_comparable<T>
+    {
+        return _value == other._value;
+    }
+
+private:
+    T _value;
+};
+
 class UXX_EXPORT string_ref {
 public:
     string_ref() = delete;
@@ -117,6 +177,32 @@ struct color_rect {
     rgba_color bottom_left;
 };
 
+namespace tags {
+    struct radius {
+    };
+    struct min {
+    };
+    struct max {
+    };
+    struct out_value {
+    };
+}
+
+/// Explicit radius type
+using radius = explicit_arg<float, tags::radius>;
+
+/// Explicit minimum type
+template <typename T>
+using min = explicit_arg<T, tags::min>;
+
+/// Explicit maximum type
+template <typename T>
+using max = explicit_arg<T, tags::max>;
+
+/// Explicit out value type
+template <typename T>
+using out_value = explicit_arg<T, tags::max>;
+
 class pencil {
     friend class window;
 
@@ -166,12 +252,12 @@ public:
     UXX_EXPORT void draw_quad_filled(const vec2d& p1, const vec2d& p2, const vec2d& p3, const vec2d& p4) const;
     UXX_EXPORT void draw_triangle(const vec2d& p1, const vec2d& p2, const vec2d& p3) const;
     UXX_EXPORT void draw_triangle_filled(const vec2d& p1, const vec2d& p2, const vec2d& p3) const;
-    UXX_EXPORT void draw_circle(const vec2d& center, float radius) const;
-    UXX_EXPORT void draw_circle(const vec2d& center, float radius, int num_segments) const;
-    UXX_EXPORT void draw_circle_filled(const vec2d& center, float radius) const;
-    UXX_EXPORT void draw_circle_filled(const vec2d& center, float radius, int num_segments) const;
-    UXX_EXPORT void draw_ngon(const vec2d& center, float radius, int num_segments) const;
-    UXX_EXPORT void draw_ngon_filled(const vec2d& center, float radius, int num_segments) const;
+    UXX_EXPORT void draw_circle(const vec2d& center, uxx::radius radius) const;
+    UXX_EXPORT void draw_circle(const vec2d& center, uxx::radius radius, int num_segments) const;
+    UXX_EXPORT void draw_circle_filled(const vec2d& center, uxx::radius radius) const;
+    UXX_EXPORT void draw_circle_filled(const vec2d& center, uxx::radius radius, int num_segments) const;
+    UXX_EXPORT void draw_ngon(const vec2d& center, uxx::radius radius, int num_segments) const;
+    UXX_EXPORT void draw_ngon_filled(const vec2d& center, uxx::radius radius, int num_segments) const;
     UXX_EXPORT void draw_polyline(const std::vector<vec2d>& points, bool closed) const;
     UXX_EXPORT void draw_convex_poly_filled(const std::vector<vec2d>& points) const;
     UXX_EXPORT void draw_bezier_curve(const vec2d& p1, const vec2d& p2, const vec2d& p3, const vec2d& p4) const;
@@ -448,14 +534,14 @@ public:
     /// \param value_min Minimum allowed value.
     /// \param value_max Maximum allowed value.
     /// \return True if value is changed.
-    bool slider_float(string_ref label, float& value, float value_min, float value_max) const;
+    bool slider_float(string_ref label, out_value<float>& value, min<float> value_min, max<float> value_max) const;
     /// Add slider (integer) to the current window.
     /// \param label Text label added to the right of the slider.
     /// \param value Storage for current slider value.
     /// \param value_min Minimum allowed value.
     /// \param value_max Maximum allowed value.
     /// \return True if value is changed.
-    bool slider_int(string_ref label, int& value, int value_min, int value_max) const;
+    bool slider_int(string_ref label, out_value<int>& value, min<int> value_min, max<int> value_max) const;
 
     template <typename F, typename... Args>
     void canvas(string_ref id, const vec2d& size, F&& f, Args&&... args) requires function<F, uxx::canvas&, uxx::pencil&, Args...>

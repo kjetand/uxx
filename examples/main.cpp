@@ -138,13 +138,13 @@ static void show_background_tab(uxx::window& tab)
         auto pencil = tab.create_pencil_background();
         pencil.set_color(RED);
         pencil.set_thickness(14.f);
-        pencil.draw_circle(window_center, window_size.x * 0.6f);
+        pencil.draw_circle(window_center, uxx::radius { window_size.x * 0.6f });
     }
     if (draw_fg) {
         auto pencil = tab.create_pencil_foreground();
         pencil.set_color(GREEN);
         pencil.set_thickness(10.f);
-        pencil.draw_circle(window_center, window_size.y * 0.6f);
+        pencil.draw_circle(window_center, uxx::radius { window_size.y * 0.6f });
     }
 }
 
@@ -158,21 +158,21 @@ static void show_primitives_tab(uxx::window& tab)
     auto pencil = tab.create_pencil();
 
     tab.label("All primitives");
-    static float sz = 36.0f;
-    tab.slider_float("Size", sz, 2.0f, 72.0f);
+    static uxx::out_value<float> sz { 36.0f };
+    tab.slider_float("Size", sz, uxx::min<float>(2.0f), uxx::max<float>(72.0f));
 
-    static float thickness = 3.0f;
-    tab.slider_float("Thickness", thickness, 1.0f, 8.0f);
+    static uxx::out_value<float> thickness { 3.0f };
+    tab.slider_float("Thickness", thickness, uxx::min<float>(1.0f), uxx::max<float>(8.0f));
 
-    static int ngon_sides = 6;
-    tab.slider_int("N-gon sides", ngon_sides, 3, 12);
+    static uxx::out_value<int> ngon_sides { 6 };
+    tab.slider_int("N-gon sides", ngon_sides, uxx::min<int> { 3 }, uxx::max<int> { 12 });
 
     static bool circle_segments_override = false;
-    static int circle_segments_override_v = 12;
+    static uxx::out_value<int> circle_segments_override_v { 12 };
     tab.checkbox("##circlesegmentoverride", circle_segments_override);
     tab.same_line();
 
-    if (tab.slider_int("Circle segments", circle_segments_override_v, 3, 40)) {
+    if (tab.slider_int("Circle segments", circle_segments_override_v, uxx::min<int> { 3 }, uxx::max<int> { 40 })) {
         circle_segments_override = true;
     }
     static auto col = uxx::rgba_color { 1.0f, 1.0f, 0.4f, 1.0f };
@@ -189,9 +189,9 @@ static void show_primitives_tab(uxx::window& tab)
 
         pencil.set_color(col);
         pencil.set_thickness(th);
-        pencil.draw_ngon({ x + sz * 0.5f, y + sz * 0.5f }, sz * 0.5f, ngon_sides);
+        pencil.draw_ngon({ x + sz * 0.5f, y + sz * 0.5f }, uxx::radius { sz * 0.5f }, ngon_sides);
         x += sz + spacing;
-        pencil.draw_circle({ x + sz * 0.5f, y + sz * 0.5f }, sz * 0.5f, circle_segments);
+        pencil.draw_circle({ x + sz * 0.5f, y + sz * 0.5f }, uxx::radius { sz * 0.5f }, circle_segments);
         x += sz + spacing;
         pencil.set_corner_properties(uxx::pencil::corner_properties {});
         pencil.draw_rect({ x, y }, { x + sz, y + sz });
@@ -216,9 +216,9 @@ static void show_primitives_tab(uxx::window& tab)
         x = p.x + 4;
         y += sz + spacing;
     }
-    pencil.draw_ngon_filled({ x + sz * 0.5f, y + sz * 0.5f }, sz * 0.5f, ngon_sides);
+    pencil.draw_ngon_filled({ x + sz * 0.5f, y + sz * 0.5f }, uxx::radius { sz * 0.5f }, ngon_sides);
     x += sz + spacing;
-    pencil.draw_circle_filled({ x + sz * 0.5f, y + sz * 0.5f }, sz * 0.5f, circle_segments);
+    pencil.draw_circle_filled({ x + sz * 0.5f, y + sz * 0.5f }, uxx::radius { sz * 0.5f }, circle_segments);
     x += sz + spacing;
     pencil.draw_rect_filled({ x, y }, { x + sz, y + sz });
     x += sz + spacing;

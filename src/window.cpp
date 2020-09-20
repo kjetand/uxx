@@ -268,14 +268,14 @@ void uxx::window::checkbox(uxx::string_ref label, bool& value) const
     ImGui::Checkbox(label, &value);
 }
 
-bool uxx::window::slider_float(uxx::string_ref label, float& value, const float value_min, const float value_max) const
+bool uxx::window::slider_float(uxx::string_ref label, uxx::out_value<float>& value, const uxx::min<float> value_min, const uxx::max<float> value_max) const
 {
-    return ImGui::SliderFloat(label, &value, value_min, value_max, "%.02f");
+    return ImGui::SliderFloat(label, &value.get(), value_min, value_max, "%.02f");
 }
 
-bool uxx::window::slider_int(uxx::string_ref label, int& value, const int value_min, const int value_max) const
+bool uxx::window::slider_int(uxx::string_ref label, uxx::out_value<int>& value, const uxx::min<int> value_min, const uxx::max<int> value_max) const
 {
-    return ImGui::SliderInt(label, &value, value_min, value_max);
+    return ImGui::SliderInt(label, &value.get(), value_min, value_max);
 }
 
 void uxx::window::color_picker(uxx::string_ref label, rgba_color& color) const

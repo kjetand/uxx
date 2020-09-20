@@ -166,34 +166,34 @@ void uxx::pencil::draw_triangle_filled(const uxx::vec2d& p1, const uxx::vec2d& p
     cast_draw_list(_draw_list).AddTriangleFilled(from_vec2d(p1), from_vec2d(p2), from_vec2d(p3), _color);
 }
 
-void uxx::pencil::draw_circle(const uxx::vec2d& center, float radius) const
+void uxx::pencil::draw_circle(const uxx::vec2d& center, const uxx::radius radius) const
 {
     draw_circle(center, radius, 0);
 }
 
-void uxx::pencil::draw_circle(const uxx::vec2d& center, float radius, int num_segments) const
+void uxx::pencil::draw_circle(const uxx::vec2d& center, const uxx::radius radius, int num_segments) const
 {
-    cast_draw_list(_draw_list).AddCircle(from_vec2d(center), radius, _color, num_segments, _thickness);
+    cast_draw_list(_draw_list).AddCircle(from_vec2d(center), radius.get(), _color, num_segments, _thickness);
 }
 
-void uxx::pencil::draw_circle_filled(const uxx::vec2d& center, float radius) const
+void uxx::pencil::draw_circle_filled(const uxx::vec2d& center, const uxx::radius radius) const
 {
     draw_circle_filled(center, radius, 0);
 }
 
-void uxx::pencil::draw_circle_filled(const uxx::vec2d& center, float radius, int num_segments) const
+void uxx::pencil::draw_circle_filled(const uxx::vec2d& center, const uxx::radius radius, int num_segments) const
 {
-    cast_draw_list(_draw_list).AddCircleFilled(from_vec2d(center), radius, _color, num_segments);
+    cast_draw_list(_draw_list).AddCircleFilled(from_vec2d(center), radius.get(), _color, num_segments);
 }
 
-void uxx::pencil::draw_ngon(const uxx::vec2d& center, float radius, int num_segments) const
+void uxx::pencil::draw_ngon(const uxx::vec2d& center, const uxx::radius radius, int num_segments) const
 {
-    cast_draw_list(_draw_list).AddNgon(from_vec2d(center), radius, _color, num_segments, _thickness);
+    cast_draw_list(_draw_list).AddNgon(from_vec2d(center), radius.get(), _color, num_segments, _thickness);
 }
 
-void uxx::pencil::draw_ngon_filled(const uxx::vec2d& center, float radius, int num_segments) const
+void uxx::pencil::draw_ngon_filled(const uxx::vec2d& center, const uxx::radius radius, int num_segments) const
 {
-    cast_draw_list(_draw_list).AddNgonFilled(from_vec2d(center), radius, _color, num_segments);
+    cast_draw_list(_draw_list).AddNgonFilled(from_vec2d(center), radius.get(), _color, num_segments);
 }
 
 void uxx::pencil::draw_polyline(const std::vector<uxx::vec2d>& points, bool closed) const
