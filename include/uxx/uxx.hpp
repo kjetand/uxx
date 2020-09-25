@@ -591,17 +591,17 @@ public:
     template <typename F, typename... Args>
     void window(string_ref title, F&& f, Args&&... args) const requires function<F, uxx::window&, Args...>
     {
-        window_impl(title, std::nullopt, window::properties {}, std::forward<F>(f), std::forward<Args>(args)...);
+        window_impl(title, std::forward<F>(f), std::forward<Args>(args)...);
     }
 
     template <typename F, typename... Args>
-    void window(string_ref title, bool& open, F&& f, Args&&... args) const requires function<F, uxx::window&, Args...>
+    void window(string_ref title, out_value<bool>& open, F&& f, Args&&... args) const requires function<F, uxx::window&, Args...>
     {
         window_impl(title, open, window::properties {}, std::forward<F>(f), std::forward<Args>(args)...);
     }
 
     template <typename F, typename... Args>
-    void window(string_ref title, bool& open, const window::properties properties, F&& f, Args&&... args) const requires function<F, uxx::window&, Args...>
+    void window(string_ref title, out_value<bool>& open, const window::properties properties, F&& f, Args&&... args) const requires function<F, uxx::window&, Args...>
     {
         window_impl(title, open, properties, std::forward<F>(f), std::forward<Args>(args)...);
     }
@@ -611,9 +611,9 @@ private:
     ~scene() noexcept = default;
 
     template <typename F, typename... Args>
-    void window_impl(string_ref title, std::optional<std::reference_wrapper<bool>> open, const window::properties properties, F&& f, Args&&... args) const requires function<F, uxx::window&, Args...>
+    void window_impl(string_ref title, out_value<bool>& open, const window::properties properties, F&& f, Args&&... args) const requires function<F, uxx::window&, Args...>
     {
-        if (!open.has_value() || (open.has_value() && open->get())) {
+        if (open.get()) {
             const auto collapsed = begin_window(title, open, properties);
             {
                 uxx::window w { collapsed };
@@ -623,7 +623,19 @@ private:
         }
     }
 
-    [[nodiscard]] window::collapsed begin_window(string_ref title, std::optional<std::reference_wrapper<bool>> open, window::properties properties) const;
+    template <typename F, typename... Args>
+    void window_impl(string_ref title, F&& f, Args&&... args) const requires function<F, uxx::window&, Args...>
+    {
+        const auto collapsed = begin_window(title);
+        {
+            uxx::window w { collapsed };
+            f(w, std::forward<Args>(args)...);
+        }
+        end_window();
+    }
+
+    [[nodiscard]] window::collapsed begin_window(string_ref title) const;
+    [[nodiscard]] window::collapsed begin_window(string_ref title, out_value<bool>& open, window::properties properties) const;
     void end_window() const;
 };
 
@@ -653,7 +665,6 @@ private:
     exit_code _exit_code { exit_code::success };
     void mainloop(const std::function<void()>& render) const;
 };
-
 }
 
 #endif
