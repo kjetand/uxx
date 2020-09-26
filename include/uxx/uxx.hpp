@@ -23,38 +23,45 @@ namespace uxx {
 
 class window;
 
-template <typename T, typename Tag>
+enum class type_property {
+    copy_and_move,
+    neither_copy_nor_move
+};
+
+template <typename T, typename Tag, type_property Property = type_property::copy_and_move>
 class explicit_arg {
 public:
+    static constexpr bool is_copyable_and_movable = Property == type_property::copy_and_move;
+
     explicit explicit_arg() noexcept(std::is_nothrow_default_constructible_v<T>) requires std::is_default_constructible_v<T> { }
     explicit explicit_arg(const T& value) noexcept(std::is_nothrow_copy_constructible_v<T>) requires std::is_copy_constructible_v<T> : _value(value) { }
     explicit explicit_arg(T&& value) noexcept(std::is_nothrow_move_constructible_v<T>) requires std::is_move_constructible_v<T> : _value(std::move(value)) { }
 
     ~explicit_arg() noexcept(std::is_nothrow_destructible_v<T>) = default;
 
-    explicit_arg(const explicit_arg<T, Tag>&) noexcept(std::is_nothrow_copy_constructible_v<T>) requires std::is_copy_constructible_v<T> = default;
-    explicit_arg(explicit_arg<T, Tag>&&) noexcept(std::is_nothrow_move_constructible_v<T>) requires std::is_move_constructible_v<T> = default;
-    explicit_arg<T, Tag>& operator=(const explicit_arg<T, Tag>&) noexcept(std::is_nothrow_copy_assignable_v<T>) requires std::is_copy_assignable_v<T> = default;
-    explicit_arg<T, Tag>& operator=(explicit_arg<T, Tag>&&) noexcept(std::is_nothrow_move_assignable_v<T>) requires std::is_move_assignable_v<T> = default;
+    explicit_arg(const explicit_arg<T, Tag, Property>&) noexcept(std::is_nothrow_copy_constructible_v<T>) requires(std::is_copy_constructible_v<T>&& is_copyable_and_movable) = default;
+    explicit_arg(explicit_arg<T, Tag, Property>&&) noexcept(std::is_nothrow_move_constructible_v<T>) requires(std::is_move_constructible_v<T>&& is_copyable_and_movable) = default;
+    explicit_arg<T, Tag, Property>& operator=(const explicit_arg<T, Tag, Property>&) noexcept(std::is_nothrow_copy_assignable_v<T>) requires(std::is_copy_assignable_v<T>&& is_copyable_and_movable) = default;
+    explicit_arg<T, Tag, Property>& operator=(explicit_arg<T, Tag, Property>&&) noexcept(std::is_nothrow_move_assignable_v<T>) requires(std::is_move_assignable_v<T>&& is_copyable_and_movable) = default;
 
-    explicit_arg<T, Tag>& operator=(const T& value) noexcept(std::is_nothrow_copy_assignable_v<T>) requires(std::is_copy_assignable_v<T> && !std::is_const_v<T>)
+    explicit_arg<T, Tag, Property>& operator=(const T& value) noexcept(std::is_nothrow_copy_assignable_v<T>) requires(std::is_copy_assignable_v<T> && not std::is_const_v<T> && is_copyable_and_movable)
     {
         _value = value;
         return *this;
     }
 
-    explicit_arg<T, Tag>& operator=(T&& value) noexcept(std::is_nothrow_move_assignable_v<T>) requires(std::is_move_assignable_v<T> && !std::is_const_v<T>)
+    explicit_arg<T, Tag, Property>& operator=(T&& value) noexcept(std::is_nothrow_move_assignable_v<T>) requires(std::is_move_assignable_v<T> && not std::is_const_v<T> && is_copyable_and_movable)
     {
         _value = std::move(value);
         return *this;
     }
 
-    operator T() const requires(std::integral<T> || std::floating_point<T>)
+    operator T() const noexcept requires(std::integral<T> || std::floating_point<T>)
     {
         return _value;
     }
 
-    [[nodiscard]] T get() const noexcept(std::is_nothrow_copy_constructible_v<T>) requires(!std::is_reference_v<T>)
+    [[nodiscard]] T get() const noexcept(std::is_nothrow_copy_constructible_v<T>) requires(not std::is_reference_v<T>)
     {
         return _value;
     }
@@ -64,7 +71,7 @@ public:
         return _value;
     }
 
-    [[nodiscard]] std::remove_reference_t<T>& get() noexcept requires(!std::is_const_v<T>)
+    [[nodiscard]] std::remove_reference_t<T>& get() noexcept requires(not std::is_const_v<T>)
     {
         return _value;
     }
@@ -74,7 +81,7 @@ public:
         return _value == other;
     }
 
-    [[nodiscard]] bool operator==(const explicit_arg<T, Tag>& other) const requires std::equality_comparable<T>
+    [[nodiscard]] bool operator==(const explicit_arg<T, Tag, Property>& other) const requires std::equality_comparable<T>
     {
         return _value == other._value;
     }
@@ -199,9 +206,9 @@ using min = explicit_arg<T, tags::min>;
 template <typename T>
 using max = explicit_arg<T, tags::max>;
 
-/// Explicit out value type
+/// Explicit out value type (neither copyable nor movable)
 template <typename T>
-using out_value = explicit_arg<T, tags::max>;
+using out_value = explicit_arg<T, tags::out_value, type_property::neither_copy_nor_move>;
 
 class pencil {
     friend class window;

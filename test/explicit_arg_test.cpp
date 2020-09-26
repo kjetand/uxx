@@ -1,28 +1,50 @@
 #include "test.hpp"
 #include "uxx/uxx.hpp"
 
-struct throwing_type {
-    explicit throwing_type() { }
-};
-
 using tag_type = void;
 
-static_assert(std::is_default_constructible_v<uxx::explicit_arg<int, tag_type>>);
-static_assert(std::is_default_constructible_v<uxx::explicit_arg<int*, tag_type>>);
-static_assert(std::is_default_constructible_v<uxx::explicit_arg<int**, tag_type>>);
-static_assert(std::is_default_constructible_v<uxx::explicit_arg<const int, tag_type>>);
-static_assert(std::is_default_constructible_v<uxx::explicit_arg<const int*, tag_type>>);
-static_assert(std::is_default_constructible_v<uxx::explicit_arg<const int**, tag_type>>);
+TEST_CASE("Copyable/movable for copyable/movable types", "[explicit_arg]")
+{
+    static_assert(std::is_default_constructible_v<uxx::explicit_arg<int, tag_type>>);
+    static_assert(std::is_default_constructible_v<uxx::explicit_arg<int*, tag_type>>);
+    static_assert(std::is_default_constructible_v<uxx::explicit_arg<int**, tag_type>>);
+    static_assert(std::is_default_constructible_v<uxx::explicit_arg<const int, tag_type>>);
+    static_assert(std::is_default_constructible_v<uxx::explicit_arg<const int*, tag_type>>);
+    static_assert(std::is_default_constructible_v<uxx::explicit_arg<const int**, tag_type>>);
+    static_assert(not std::is_default_constructible_v<uxx::explicit_arg<int&, tag_type>>);
+    static_assert(not std::is_default_constructible_v<uxx::explicit_arg<int&&, tag_type>>);
+    static_assert(not std::is_default_constructible_v<uxx::explicit_arg<int&, tag_type>>);
+    static_assert(not std::is_default_constructible_v<uxx::explicit_arg<int&&, tag_type>>);
+    static_assert(not std::is_default_constructible_v<uxx::explicit_arg<const int&, tag_type>>);
+    static_assert(not std::is_default_constructible_v<uxx::explicit_arg<const int&&, tag_type>>);
+}
 
-static_assert(!std::is_default_constructible_v<uxx::explicit_arg<int&, tag_type>>);
-static_assert(!std::is_default_constructible_v<uxx::explicit_arg<int&&, tag_type>>);
-static_assert(!std::is_default_constructible_v<uxx::explicit_arg<int&, tag_type>>);
-static_assert(!std::is_default_constructible_v<uxx::explicit_arg<int&&, tag_type>>);
-static_assert(!std::is_default_constructible_v<uxx::explicit_arg<const int&, tag_type>>);
-static_assert(!std::is_default_constructible_v<uxx::explicit_arg<const int&&, tag_type>>);
+TEST_CASE("No-throw when type is no-throw", "[explicit_arg]")
+{
+    struct throwing_type {
+        explicit throwing_type() { }
+    };
+    static_assert(std::is_nothrow_default_constructible_v<uxx::explicit_arg<int, tag_type>>);
+    static_assert(!std::is_nothrow_default_constructible_v<uxx::explicit_arg<throwing_type, tag_type>>);
+}
 
-static_assert(std::is_nothrow_default_constructible_v<uxx::explicit_arg<int, tag_type>>);
-static_assert(!std::is_nothrow_default_constructible_v<uxx::explicit_arg<throwing_type, tag_type>>);
+TEST_CASE("Enable/Disable copy and move", "[explicit_arg]")
+{
+    struct type {
+    };
+    using copyable_and_movable = uxx::explicit_arg<type, tag_type>;
+    using neither_copyable_nor_movable = uxx::explicit_arg<type, tag_type, uxx::type_property::neither_copy_nor_move>;
+
+    static_assert(std::is_copy_constructible_v<copyable_and_movable>);
+    static_assert(std::is_copy_assignable_v<copyable_and_movable>);
+    static_assert(std::is_move_constructible_v<copyable_and_movable>);
+    static_assert(std::is_move_assignable_v<copyable_and_movable>);
+
+    static_assert(not std::is_copy_constructible_v<neither_copyable_nor_movable>);
+    static_assert(not std::is_copy_assignable_v<neither_copyable_nor_movable>);
+    static_assert(not std::is_move_constructible_v<neither_copyable_nor_movable>);
+    static_assert(not std::is_move_assignable_v<neither_copyable_nor_movable>);
+}
 
 TEST_CASE("Is R-value constructible and assignable", "[explicit_arg]")
 {
