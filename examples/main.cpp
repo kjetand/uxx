@@ -11,8 +11,8 @@ struct canvas_state {
     std::vector<uxx::vec2d> points {};
     uxx::vec2d scrolling { 0.0f, 0.0f };
     bool adding_line = false;
-    bool opt_enable_context_menu = true;
-    bool opt_enable_grid = true;
+    uxx::result<bool> enable_context_menu { true };
+    uxx::result<bool> enable_grid { true };
 };
 
 static void draw_gradient(uxx::canvas& canvas, uxx::pencil& pencil, const uxx::rgba_color& color_a, const uxx::rgba_color& color_b)
@@ -39,7 +39,7 @@ static void show_canvas_popup(uxx::popup& popup, canvas_state& state)
 
 static void draw_canvas_grid(uxx::pencil& pencil, canvas_state& state, const uxx::vec2d& canvas_size, const uxx::vec2d& canvas_p0, const uxx::vec2d& canvas_p1, const uxx::vec2d& origin)
 {
-    if (state.opt_enable_grid) {
+    if (state.enable_grid) {
         constexpr float GRID_STEP = 64.0f;
         constexpr auto color = uxx::rgba_color::from_integers(200, 200, 200, 40);
         pencil.set_color(color);
@@ -79,13 +79,13 @@ static void draw_canvas(uxx::canvas& canvas, uxx::pencil& pencil, canvas_state& 
             state.adding_line = false;
         }
     }
-    const float mouse_threshold_for_pan = state.opt_enable_context_menu ? -1.0f : 0.0f;
+    const float mouse_threshold_for_pan = state.enable_context_menu ? -1.0f : 0.0f;
 
     if (canvas.is_active() && mouse.is_dragging(uxx::mouse::button::right, mouse_threshold_for_pan)) {
         state.scrolling.x += mouse.get_delta_x();
         state.scrolling.y += mouse.get_delta_y();
     }
-    if (state.opt_enable_context_menu) {
+    if (state.enable_context_menu) {
         canvas.popup("context", show_canvas_popup, state);
     }
     pencil.clip_rectangle(canvas.get_position(), canvas_p1, draw_canvas_grid, state, canvas.get_size(), canvas.get_position(), canvas_p1, origin);
@@ -95,8 +95,8 @@ static void show_canvas_tab(uxx::window& tab)
 {
     static canvas_state state {};
 
-    tab.checkbox("Enable grid", state.opt_enable_grid);
-    tab.checkbox("Enable context menu", state.opt_enable_context_menu);
+    tab.checkbox("Enable grid", state.enable_grid);
+    tab.checkbox("Enable context menu", state.enable_context_menu);
     tab.label("Mouse Left: drag to add lines,\nMouse Right: drag to scroll, click for context menu.");
 
     const auto canvas_p0 = tab.get_cursor_screen_position();
@@ -122,8 +122,8 @@ static void show_canvas_tab(uxx::window& tab)
 
 static void show_background_tab(uxx::window& tab)
 {
-    static bool draw_bg = true;
-    static bool draw_fg = true;
+    static uxx::result<bool> draw_bg { true };
+    static uxx::result<bool> draw_fg { true };
 
     tab.checkbox("Draw in the background", draw_bg);
     tab.same_line();
@@ -158,24 +158,24 @@ static void show_primitives_tab(uxx::window& tab)
     auto pencil = tab.create_pencil();
 
     tab.label("All primitives");
-    static uxx::out_value<float> sz { 36.0f };
+    static uxx::result<float> sz { 36.0f };
     tab.slider_float("Size", sz, uxx::min<float>(2.0f), uxx::max<float>(72.0f));
 
-    static uxx::out_value<float> thickness { 3.0f };
+    static uxx::result<float> thickness { 3.0f };
     tab.slider_float("Thickness", thickness, uxx::min<float>(1.0f), uxx::max<float>(8.0f));
 
-    static uxx::out_value<int> ngon_sides { 6 };
+    static uxx::result<int> ngon_sides { 6 };
     tab.slider_int("N-gon sides", ngon_sides, uxx::min<int> { 3 }, uxx::max<int> { 12 });
 
-    static bool circle_segments_override = false;
-    static uxx::out_value<int> circle_segments_override_v { 12 };
+    static uxx::result<bool> circle_segments_override { false };
+    static uxx::result<int> circle_segments_override_v { 12 };
     tab.checkbox("##circlesegmentoverride", circle_segments_override);
     tab.same_line();
 
     if (tab.slider_int("Circle segments", circle_segments_override_v, uxx::min<int> { 3 }, uxx::max<int> { 40 })) {
         circle_segments_override = true;
     }
-    static auto col = uxx::rgba_color { 1.0f, 1.0f, 0.4f, 1.0f };
+    static uxx::result<uxx::rgba_color> col { uxx::rgba_color { 1.0f, 1.0f, 0.4f, 1.0f } };
     tab.color_picker("Color", col);
 
     const auto p = tab.get_cursor_screen_position();
@@ -187,7 +187,7 @@ static void show_primitives_tab(uxx::window& tab)
     for (int n = 0; n < 2; n++) {
         const float th = (n == 0) ? 1.0f : thickness;
 
-        pencil.set_color(col);
+        pencil.set_color(col.get());
         pencil.set_thickness(th);
         pencil.draw_ngon({ x + sz * 0.5f, y + sz * 0.5f }, uxx::radius { sz * 0.5f }, ngon_sides);
         x += sz + spacing;

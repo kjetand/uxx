@@ -6,7 +6,7 @@ uxx::window::collapsed uxx::scene::begin_window(uxx::string_ref title) const
     return ImGui::Begin(title) ? window::collapsed::no : window::collapsed::yes;
 }
 
-uxx::window::collapsed uxx::scene::begin_window(uxx::string_ref title, uxx::out_value<bool>& open, uxx::window::properties properties) const
+uxx::window::collapsed uxx::scene::begin_window(uxx::string_ref title, uxx::result<bool>& open, uxx::window::properties properties) const
 {
     return ImGui::Begin(title, &open.get(), static_cast<int>(properties)) ? window::collapsed::no : window::collapsed::yes;
 }
@@ -247,7 +247,7 @@ void uxx::window::same_line() const
     ImGui::SameLine();
 }
 
-void uxx::window::input_text(uxx::string_ref label, std::string& value) const
+void uxx::window::input_text(uxx::string_ref label, uxx::result<std::string>& value) const
 {
     static const auto string_appender = [](ImGuiInputTextCallbackData* data) {
         auto* user_data = reinterpret_cast<std::string*>(data->UserData);
@@ -259,30 +259,30 @@ void uxx::window::input_text(uxx::string_ref label, std::string& value) const
         return 0;
     };
     const ImGuiInputTextFlags flags = ImGuiInputTextFlags_None | ImGuiInputTextFlags_CallbackResize;
-    auto* raw_value = const_cast<char*>(value.c_str());
-    const auto buf_size = value.capacity() + 1;
+    auto* raw_value = const_cast<char*>(value.get().c_str());
+    const auto buf_size = value.get().capacity() + 1;
 
     ImGui::InputText(label, raw_value, buf_size, flags, string_appender, &value);
 }
 
-void uxx::window::checkbox(uxx::string_ref label, bool& value) const
+void uxx::window::checkbox(uxx::string_ref label, result<bool>& value) const
 {
-    ImGui::Checkbox(label, &value);
+    ImGui::Checkbox(label, &value.get());
 }
 
-bool uxx::window::slider_float(uxx::string_ref label, uxx::out_value<float>& value, const uxx::min<float> value_min, const uxx::max<float> value_max) const
+bool uxx::window::slider_float(uxx::string_ref label, uxx::result<float>& value, const uxx::min<float> value_min, const uxx::max<float> value_max) const
 {
     return ImGui::SliderFloat(label, &value.get(), value_min, value_max, "%.02f");
 }
 
-bool uxx::window::slider_int(uxx::string_ref label, uxx::out_value<int>& value, const uxx::min<int> value_min, const uxx::max<int> value_max) const
+bool uxx::window::slider_int(uxx::string_ref label, uxx::result<int>& value, const uxx::min<int> value_min, const uxx::max<int> value_max) const
 {
     return ImGui::SliderInt(label, &value.get(), value_min, value_max);
 }
 
-void uxx::window::color_picker(uxx::string_ref label, rgba_color& color) const
+void uxx::window::color_picker(uxx::string_ref label, result<rgba_color>& color) const
 {
-    ImGui::ColorEdit4(label, &color.r);
+    ImGui::ColorEdit4(label, &color.get().r);
 }
 
 void uxx::window::invisible_button(uxx::string_ref id, const uxx::vec2d& size) const

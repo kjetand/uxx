@@ -44,13 +44,13 @@ public:
     explicit_arg<T, Tag, Property>& operator=(const explicit_arg<T, Tag, Property>&) noexcept(std::is_nothrow_copy_assignable_v<T>) requires(std::is_copy_assignable_v<T>&& is_copyable_and_movable) = default;
     explicit_arg<T, Tag, Property>& operator=(explicit_arg<T, Tag, Property>&&) noexcept(std::is_nothrow_move_assignable_v<T>) requires(std::is_move_assignable_v<T>&& is_copyable_and_movable) = default;
 
-    explicit_arg<T, Tag, Property>& operator=(const T& value) noexcept(std::is_nothrow_copy_assignable_v<T>) requires(std::is_copy_assignable_v<T> && not std::is_const_v<T> && is_copyable_and_movable)
+    explicit_arg<T, Tag, Property>& operator=(const T& value) noexcept(std::is_nothrow_copy_assignable_v<T>) requires(std::is_copy_assignable_v<T> && not std::is_const_v<T>)
     {
         _value = value;
         return *this;
     }
 
-    explicit_arg<T, Tag, Property>& operator=(T&& value) noexcept(std::is_nothrow_move_assignable_v<T>) requires(std::is_move_assignable_v<T> && not std::is_const_v<T> && is_copyable_and_movable)
+    explicit_arg<T, Tag, Property>& operator=(T&& value) noexcept(std::is_nothrow_move_assignable_v<T>) requires(std::is_move_assignable_v<T> && not std::is_const_v<T>)
     {
         _value = std::move(value);
         return *this;
@@ -208,7 +208,7 @@ using max = explicit_arg<T, tags::max>;
 
 /// Explicit out value type (neither copyable nor movable)
 template <typename T>
-using out_value = explicit_arg<T, tags::out_value, type_property::neither_copy_nor_move>;
+using result = explicit_arg<T, tags::out_value, type_property::neither_copy_nor_move>;
 
 class pencil {
     friend class window;
@@ -526,29 +526,29 @@ public:
     /// Add input text field to the current window.
     /// \param label A label added before the input text field.
     /// \param value Storage for the input text.
-    void input_text(string_ref label, std::string& value) const;
+    void input_text(string_ref label, result<std::string>& value) const;
     /// Adds a checkbox to the current window.
     /// \param label A label added after the checkbox.
     /// \param value Storage for the current checked-value.
-    void checkbox(string_ref label, bool& value) const;
+    void checkbox(string_ref label, result<bool>& value) const;
     /// Show color picker.
     /// \param label Text label for the color picker
     /// \param color Storage of the current picked color
-    void color_picker(string_ref label, rgba_color& color) const;
+    void color_picker(string_ref label, result<rgba_color>& color) const;
     /// Add slider (float) to the current window.
     /// \param label Text label added to the right of the slider.
     /// \param value Storage for current slider value.
     /// \param value_min Minimum allowed value.
     /// \param value_max Maximum allowed value.
     /// \return True if value is changed.
-    bool slider_float(string_ref label, out_value<float>& value, min<float> value_min, max<float> value_max) const;
+    bool slider_float(string_ref label, result<float>& value, min<float> value_min, max<float> value_max) const;
     /// Add slider (integer) to the current window.
     /// \param label Text label added to the right of the slider.
     /// \param value Storage for current slider value.
     /// \param value_min Minimum allowed value.
     /// \param value_max Maximum allowed value.
     /// \return True if value is changed.
-    bool slider_int(string_ref label, out_value<int>& value, min<int> value_min, max<int> value_max) const;
+    bool slider_int(string_ref label, result<int>& value, min<int> value_min, max<int> value_max) const;
 
     template <typename F, typename... Args>
     void canvas(string_ref id, const vec2d& size, F&& f, Args&&... args) requires function<F, uxx::canvas&, uxx::pencil&, Args...>
@@ -602,13 +602,13 @@ public:
     }
 
     template <typename F, typename... Args>
-    void window(string_ref title, out_value<bool>& open, F&& f, Args&&... args) const requires function<F, uxx::window&, Args...>
+    void window(string_ref title, result<bool>& open, F&& f, Args&&... args) const requires function<F, uxx::window&, Args...>
     {
         window_impl(title, open, window::properties {}, std::forward<F>(f), std::forward<Args>(args)...);
     }
 
     template <typename F, typename... Args>
-    void window(string_ref title, out_value<bool>& open, const window::properties properties, F&& f, Args&&... args) const requires function<F, uxx::window&, Args...>
+    void window(string_ref title, result<bool>& open, const window::properties properties, F&& f, Args&&... args) const requires function<F, uxx::window&, Args...>
     {
         window_impl(title, open, properties, std::forward<F>(f), std::forward<Args>(args)...);
     }
@@ -618,7 +618,7 @@ private:
     ~scene() noexcept = default;
 
     template <typename F, typename... Args>
-    void window_impl(string_ref title, out_value<bool>& open, const window::properties properties, F&& f, Args&&... args) const requires function<F, uxx::window&, Args...>
+    void window_impl(string_ref title, result<bool>& open, const window::properties properties, F&& f, Args&&... args) const requires function<F, uxx::window&, Args...>
     {
         if (open.get()) {
             const auto collapsed = begin_window(title, open, properties);
@@ -642,7 +642,7 @@ private:
     }
 
     [[nodiscard]] window::collapsed begin_window(string_ref title) const;
-    [[nodiscard]] window::collapsed begin_window(string_ref title, out_value<bool>& open, window::properties properties) const;
+    [[nodiscard]] window::collapsed begin_window(string_ref title, result<bool>& open, window::properties properties) const;
     void end_window() const;
 };
 
