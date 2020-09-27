@@ -2,19 +2,14 @@
 
 Simple immediate mode GUI library for C++20.
 
-|Compiler|Status|
-|--------|------|
-|MSVC 19.26|[![AppVeyor Build status](https://img.shields.io/appveyor/ci/kjetand/uxx.svg)](https://ci.appveyor.com/project/kjetand/uxx)|
-|GCC 10.1|[![Build Status](https://travis-ci.org/kjetand/uxx.svg?branch=master)](https://travis-ci.org/kjetand/uxx)|
-
 ## Build
 
 ### Requirements
 
-| OS       | Build tool      | Compiler        |
-|----------|-----------------|-----------------|
-| Linux    | `cmake >= 3.15` | `g++ >= 10.1`   |
-| Windows  | `cmake >= 3.15` | `msvc >= 19.26` |
+| OS       | Build tool      | Compilers                              | Status                                                                                                                     |
+|----------|-----------------|----------------------------------------|----------------------------------------------------------------------------------------------------------------------------|
+| Linux    | `cmake >= 3.15` | `g++ >= 10.1`<br><br>`clang++ >= 10.0` | [![Build Status](https://travis-ci.org/kjetand/uxx.svg?branch=master)](https://travis-ci.org/kjetand/uxx)                  |
+| Windows  | `cmake >= 3.15` | `msvc >= 19.26`                        | [![AppVeyor Build status](https://img.shields.io/appveyor/ci/kjetand/uxx.svg)](https://ci.appveyor.com/project/kjetand/uxx)|
 
 ### Dependencies
 

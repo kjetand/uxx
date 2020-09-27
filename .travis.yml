@@ -4,6 +4,11 @@ install:
   - pip --version
   - pip install --user cmake
 
+common_sources: &all_sources
+  - sourceline: 'ppa:ubuntu-toolchain-r/test'
+  - sourceline: 'deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-10 main'
+    key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
+
 jobs:
   include:
     - os: linux
@@ -14,14 +19,28 @@ jobs:
         - MATRIX_EVAL="CC=gcc-${GCC_VER} && CXX=g++-${GCC_VER}"
       addons:
         apt:
-          sources:
-            - ubuntu-toolchain-r-test
+          sources: *all_sources
           packages:
             - gcc-10
             - g++-10
             - libglu1-mesa-dev
             - freeglut3-dev
             - mesa-common-dev
+
+    - os: linux
+      dist: bionic
+      compiler: clang
+      addons:
+        apt:
+          sources: *all_sources
+          packages:
+            - g++-10
+            - clang-10
+            - libglu1-mesa-dev
+            - freeglut3-dev
+            - mesa-common-dev
+      env:
+        - MATRIX_EVAL="CC=clang-10 && CXX=clang++-10"
 
 before_script:
   - eval "${MATRIX_EVAL}"
