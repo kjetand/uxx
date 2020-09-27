@@ -26,7 +26,7 @@ namespace {
 #ifdef _WIN32
     std::transform(points.cbegin(), points.cend(), std::back_inserter(copy), convert);
 #else
-    std::ranges::copy(std::ranges::views::transform(points, convert), std::back_inserter(copy));
+    std::ranges::transform(points, std::back_inserter(copy), convert);
 #endif
     return copy;
 }

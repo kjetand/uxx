@@ -5,8 +5,10 @@ if (APPLE)
     message(FATAL_ERROR "OSX is currently not supported")
 endif ()
 
-if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    message(FATAL_ERROR "Only MSVC and GCC compilers are currently supported")
+if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND
+        NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND
+        NOT CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    message(FATAL_ERROR "Only MSVC, GCC and Clang compilers are currently supported")
 endif ()
 
 set(CMAKE_CXX_STANDARD 20)

@@ -4,8 +4,14 @@
 #include <catch2/catch.hpp>
 
 #ifndef UXX_SUPPRESS_EXTERNAL_WARNINGS
-#ifdef _WIN32
+#if defined(_WIN32)
 #define UXX_SUPPRESS_EXTERNAL_WARNINGS(code) code
+#elif defined(__clang__)
+#define UXX_SUPPRESS_EXTERNAL_WARNINGS(code)                \
+    _Pragma("clang diagnostic push");                         \
+    _Pragma("clang diagnostic ignored \"-Wold-style-cast\""); \
+    code                                                    \
+        _Pragma("clang diagnostic pop");
 #else
 #define UXX_SUPPRESS_EXTERNAL_WARNINGS(code)                \
     _Pragma("GCC diagnostic push");                         \
@@ -16,7 +22,7 @@
 #endif
 #endif
 
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__clang__)
 #include <imgui.h>
 #include <imgui_internal.h>
 #else
