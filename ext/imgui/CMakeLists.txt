@@ -1,3 +1,5 @@
+add_definitions(-DIMGUI_DISABLE_OBSOLETE_FUNCTIONS)
+
 add_library(imgui_sfml STATIC
         imgui_widgets.cpp
         imgui_draw.cpp

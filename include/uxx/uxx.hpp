@@ -191,6 +191,8 @@ namespace tags {
     };
     struct max {
     };
+    struct drag_speed {
+    };
     struct out_value {
     };
 }
@@ -200,18 +202,37 @@ using radius = explicit_arg<float, tags::radius>;
 
 /// Explicit minimum type
 template <typename T>
-using min = explicit_arg<T, tags::min>;
+requires(std::integral<T> || std::floating_point<T>) using min = explicit_arg<T, tags::min>;
 
 /// Explicit maximum type
 template <typename T>
-using max = explicit_arg<T, tags::max>;
+requires(std::integral<T> || std::floating_point<T>) using max = explicit_arg<T, tags::max>;
+
+/// Explicit speed type
+template <typename T>
+requires(std::integral<T> || std::floating_point<T>) using drag_speed = explicit_arg<T, tags::drag_speed>;
 
 /// Explicit out value type (neither copyable nor movable)
 template <typename T>
 using result = explicit_arg<T, tags::out_value, type_property::neither_copy_nor_move>;
 
+// TODO: All Ts must be of same type
+// TODO: Must have two or more Ts
+/// Explicit out variable as std::tuple of multiple results.
+template <typename... Ts>
+using multi_result = std::tuple<result<Ts>...>;
+
+enum class direction {
+    none,
+    left,
+    right,
+    up,
+    down
+};
+
 class pencil {
     friend class window;
+    friend class tooltip;
 
 public:
     enum type {
@@ -407,8 +428,8 @@ public:
     [[nodiscard]] bool is_active() const;
 
     /// Show popup menu.
-    /// \tparam F User provided callback type that is required to take a uxx::popup reference and optionally user provided argument types
-    /// \tparam Args User provided argument types that will be required by 'F'
+    /// \tparam F
+    /// \tparam Args
     /// \param id Identifier of this popup menu
     /// \param f User provided callback
     /// \param args Optional user provided arguments that are yielded to 'f'
@@ -437,6 +458,71 @@ private:
     [[nodiscard]] popup::visible begin_popup(string_ref id) const;
     void end_popup() const;
     void open_popup_context_item(string_ref id) const;
+};
+
+class UXX_EXPORT tooltip {
+    friend class window;
+
+public:
+    ~tooltip() noexcept = default;
+
+    tooltip(const tooltip&) = delete;
+    tooltip(tooltip&&) noexcept = default;
+    tooltip& operator=(const tooltip&) = delete;
+    tooltip& operator=(tooltip&&) noexcept = default;
+
+    /// \return Drawing API for the tooltip.
+    pencil create_pencil() const;
+    /// \return Position of the current tooltip relative to the application screen.
+    [[nodiscard]] vec2d get_position() const noexcept;
+    /// Adds an invisible area to the current tooltip.
+    void empty_space(const vec2d& size) const;
+
+private:
+    vec2d _position;
+
+    explicit tooltip();
+};
+
+class UXX_EXPORT color_picker_properties {
+public:
+    explicit color_picker_properties() noexcept;
+    ~color_picker_properties() noexcept = default;
+
+    color_picker_properties(const color_picker_properties&) = default;
+    color_picker_properties(color_picker_properties&&) noexcept = default;
+    color_picker_properties& operator=(const color_picker_properties&) = default;
+    color_picker_properties& operator=(color_picker_properties&&) noexcept = default;
+
+    [[nodiscard]] constexpr explicit operator int() const noexcept;
+
+    color_picker_properties clear() noexcept;
+    color_picker_properties set_no_alpha() noexcept;
+    color_picker_properties set_no_picker() noexcept;
+    color_picker_properties set_no_options() noexcept;
+    color_picker_properties set_no_small_preview() noexcept;
+    color_picker_properties set_no_inputs() noexcept;
+    color_picker_properties set_no_tooltip() noexcept;
+    color_picker_properties set_no_label() noexcept;
+    color_picker_properties set_no_side_preview() noexcept;
+    color_picker_properties set_no_drag_drop() noexcept;
+    color_picker_properties set_no_border() noexcept;
+    color_picker_properties set_alpha_bar() noexcept;
+    color_picker_properties set_alpha_preview() noexcept;
+    color_picker_properties set_alpha_preview_half() noexcept;
+    color_picker_properties set_hdr() noexcept;
+    color_picker_properties set_display_rgb() noexcept;
+    color_picker_properties set_display_hsv() noexcept;
+    color_picker_properties set_display_hex() noexcept;
+    color_picker_properties set_uint8() noexcept;
+    color_picker_properties set_float() noexcept;
+    color_picker_properties set_picker_hue_bar() noexcept;
+    color_picker_properties set_picker_hue_wheel() noexcept;
+    color_picker_properties set_input_rgb() noexcept;
+    color_picker_properties set_input_hsv() noexcept;
+
+private:
+    int _flags;
 };
 
 class UXX_EXPORT window {
@@ -530,7 +616,8 @@ public:
     /// Adds a checkbox to the current window.
     /// \param label A label added after the checkbox.
     /// \param value Storage for the current checked-value.
-    void checkbox(string_ref label, result<bool>& value) const;
+    /// \return True if pressed.
+    bool checkbox(string_ref label, result<bool>& value) const;
     /// Show color picker.
     /// \param label Text label for the color picker
     /// \param color Storage of the current picked color
@@ -549,6 +636,25 @@ public:
     /// \param value_max Maximum allowed value.
     /// \return True if value is changed.
     bool slider_int(string_ref label, result<int>& value, min<int> value_min, max<int> value_max) const;
+
+    // TODO: Document when I know what they are
+    void separator() const;
+    bool slider_float(string_ref label, multi_result<float, float>& value, min<float> value_min, max<float> value_max) const;
+    void drag_float(string_ref label, result<float>& value, drag_speed<float> speed, min<float> value_min, max<float> value_max) const;
+
+    /// Align the width of a group of items inside a window.
+    /// \tparam F
+    /// \tparam Args
+    /// \param width
+    /// \param f User provided callback
+    /// \param args Optional user provided arguments that are yielded to 'f'
+    template <typename F, typename... Args>
+    void align_width(const float width, F&& f, Args&&... args) requires function<F, uxx::window&, Args...>
+    {
+        push_item_width(width);
+        f(*this, std::forward<Args>(args)...);
+        pop_item_width();
+    }
 
     template <typename F, typename... Args>
     void canvas(string_ref id, const vec2d& size, F&& f, Args&&... args) requires function<F, uxx::canvas&, uxx::pencil&, Args...>
@@ -570,6 +676,15 @@ public:
         }
     }
 
+    template <typename F, typename... Args>
+    void tooltip(F&& f, Args&&... args) requires function<F, uxx::tooltip&, Args...>
+    {
+        begin_tooltip();
+        uxx::tooltip tt {};
+        f(tt, std::forward<Args>(args)...);
+        end_tooltip();
+    }
+
 private:
     enum class collapsed {
         yes,
@@ -584,6 +699,12 @@ private:
     [[nodiscard]] tab_bar::visible begin_tab_bar(string_ref id) const;
     void end_tab_bar() const;
     void invisible_button(string_ref id, const vec2d& size) const;
+
+    void begin_tooltip() const;
+    void end_tooltip() const;
+
+    void push_item_width(float width) const;
+    void pop_item_width() const;
 };
 
 class UXX_EXPORT scene {
@@ -646,6 +767,48 @@ private:
     void end_window() const;
 };
 
+struct style {
+    result<float> Alpha;
+    multi_result<float, float> WindowPadding;
+    result<float> WindowRounding;
+    result<float> WindowBorderSize;
+    multi_result<float, float> WindowMinSize;
+    multi_result<float, float> WindowTitleAlign;
+    direction WindowMenuButtonPosition;
+    result<float> ChildRounding;
+    result<float> ChildBorderSize;
+    result<float> PopupRounding;
+    result<float> PopupBorderSize;
+    multi_result<float, float> FramePadding;
+    result<float> FrameRounding;
+    result<float> FrameBorderSize;
+    multi_result<float, float> ItemSpacing;
+    multi_result<float, float> ItemInnerSpacing;
+    multi_result<float, float> TouchExtraPadding;
+    result<float> IndentSpacing;
+    result<float> ColumnsMinSpacing;
+    result<float> ScrollbarSize;
+    result<float> ScrollbarRounding;
+    result<float> GrabMinSize;
+    result<float> GrabRounding;
+    result<float> LogSliderDeadzone;
+    result<float> TabRounding;
+    result<float> TabBorderSize;
+    result<float> TabMinWidthForUnselectedCloseButton;
+    direction ColorButtonPosition;
+    multi_result<float, float> ButtonTextAlign;
+    multi_result<float, float> SelectableTextAlign;
+    multi_result<float, float> DisplayWindowPadding;
+    multi_result<float, float> DisplaySafeAreaPadding;
+    result<float> MouseCursorScale;
+    result<bool> AntiAliasedLines;
+    result<bool> AntiAliasedLinesUseTex;
+    result<bool> AntiAliasedFill;
+    result<float> CurveTessellationTol;
+    result<float> CircleSegmentMaxError;
+    //rgba_color      Colors[ImGuiCol_COUNT];
+};
+
 class UXX_EXPORT app {
 public:
     enum class exit_code : int { success = 0 };
@@ -668,10 +831,16 @@ public:
         return static_cast<int>(_exit_code);
     }
 
+    // TODO: part of scene?
+    /// \return Reference to the singleton style objects
+    [[nodiscard]] static style& get_style();
+    static void set_style(const style& style);
+
 private:
     exit_code _exit_code { exit_code::success };
     void mainloop(const std::function<void()>& render) const;
 };
+
 }
 
 #endif

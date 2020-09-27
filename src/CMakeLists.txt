@@ -8,7 +8,9 @@ add_library(${PROJECT_NAME} SHARED
         tab_bar.cpp
         mouse.cpp
         popup.cpp
-        canvas.cpp)
+        canvas.cpp
+        tooltip.cpp
+        color_picker_properties.cpp)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
         project_warnings

@@ -187,16 +187,19 @@ uxx::vec2d uxx::window::get_size() const
     const auto size = ImGui::GetWindowSize();
     return vec2d { size.x, size.y };
 }
+
 uxx::vec2d uxx::window::get_cursor_screen_position() const
 {
     const auto pos = ImGui::GetCursorScreenPos();
     return { pos.x, pos.y };
 }
+
 uxx::vec2d uxx::window::get_content_size() const
 {
     const auto pos = ImGui::GetContentRegionAvail();
     return { pos.x, pos.y };
 }
+
 uxx::mouse uxx::window::get_mouse() const
 {
     return mouse {};
@@ -265,9 +268,9 @@ void uxx::window::input_text(uxx::string_ref label, uxx::result<std::string>& va
     ImGui::InputText(label, raw_value, buf_size, flags, string_appender, &value);
 }
 
-void uxx::window::checkbox(uxx::string_ref label, result<bool>& value) const
+bool uxx::window::checkbox(uxx::string_ref label, result<bool>& value) const
 {
-    ImGui::Checkbox(label, &value.get());
+    return ImGui::Checkbox(label, &value.get());
 }
 
 bool uxx::window::slider_float(uxx::string_ref label, uxx::result<float>& value, const uxx::min<float> value_min, const uxx::max<float> value_max) const
@@ -275,9 +278,25 @@ bool uxx::window::slider_float(uxx::string_ref label, uxx::result<float>& value,
     return ImGui::SliderFloat(label, &value.get(), value_min, value_max, "%.02f");
 }
 
+bool uxx::window::slider_float(uxx::string_ref label, uxx::multi_result<float, float>& value, uxx::min<float> value_min, uxx::max<float> value_max) const
+{
+    static float values[2];
+    values[0] = std::get<0>(value);
+    values[1] = std::get<1>(value);
+    const bool changed = ImGui::SliderFloat2(label, values, value_min, value_max, "%.02f");
+    std::get<0>(value) = values[0];
+    std::get<1>(value) = values[1];
+    return changed;
+}
+
 bool uxx::window::slider_int(uxx::string_ref label, uxx::result<int>& value, const uxx::min<int> value_min, const uxx::max<int> value_max) const
 {
     return ImGui::SliderInt(label, &value.get(), value_min, value_max);
+}
+
+void uxx::window::drag_float(uxx::string_ref label, uxx::result<float>& value, drag_speed<float> speed, min<float> value_min, max<float> value_max) const
+{
+    ImGui::DragFloat(label, &value.get(), speed, value_min, value_max, "%.02f");
 }
 
 void uxx::window::color_picker(uxx::string_ref label, result<rgba_color>& color) const
@@ -295,4 +314,29 @@ void uxx::window::invisible_button(uxx::string_ref id, const uxx::vec2d& size) c
 void uxx::window::empty_space(const uxx::vec2d& size) const
 {
     ImGui::Dummy({ size.x, size.y });
+}
+
+void uxx::window::separator() const
+{
+    ImGui::Separator();
+}
+
+void uxx::window::begin_tooltip() const
+{
+    ImGui::BeginTooltip();
+}
+
+void uxx::window::end_tooltip() const
+{
+    ImGui::EndTooltip();
+}
+
+void uxx::window::push_item_width(const float width) const
+{
+    ImGui::PushItemWidth(width);
+}
+
+void uxx::window::pop_item_width() const
+{
+    ImGui::PopItemWidth();
 }

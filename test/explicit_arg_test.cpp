@@ -98,3 +98,15 @@ TEST_CASE("Support out variables", "[explicit_arg]")
     out_argument(it_is_true);
     REQUIRE(it_is_true.get());
 }
+
+TEST_CASE("Support multiple results", "[explicit_arg]")
+{
+    uxx::multi_result<int, int> values {};
+    const auto sink = [](uxx::multi_result<int, int>& v) {
+        std::get<0>(v) = 123;
+        std::get<1>(v) = 321;
+    };
+    sink(values);
+    REQUIRE(std::get<0>(values) == 123);
+    REQUIRE(std::get<1>(values) == 321);
+}
