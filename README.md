@@ -43,5 +43,4 @@ Special thanks to:
 
 - Omar Cornut and ImGui contributors (https://github.com/ocornut/imgui)
 - Elias Daler (https://github.com/eliasdaler/imgui-sfml)
-- Jonathan Müller (https://github.com/foonathan/type_safe)
 - Catch2 team (https://github.com/catchorg/Catch2)
