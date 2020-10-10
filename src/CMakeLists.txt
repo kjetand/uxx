@@ -11,7 +11,7 @@ add_library(${PROJECT_NAME} SHARED
         canvas.cpp)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
-        project_warnings
+        uxx_warnings
         ${OPENGL_LIBRARIES}
         ${SFML_LIBRARIES}
         imgui_sfml)

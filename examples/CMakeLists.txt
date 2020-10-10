@@ -1,7 +1,7 @@
 add_executable(${PROJECT_NAME}_example main.cpp)
 
 target_link_libraries(${PROJECT_NAME}_example PRIVATE
-        project_warnings
+        uxx_warnings
         ${PROJECT_NAME}
         ${SFML_LIBRARIES})
 

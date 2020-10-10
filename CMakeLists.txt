@@ -19,7 +19,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
-add_library(project_warnings INTERFACE)
+add_library(uxx_warnings INTERFACE)
 
 find_package(OpenGL REQUIRED)
 
@@ -43,7 +43,7 @@ set(SFML_ROOT ${CMAKE_BINARY_DIR}/SFML-2.5.1/)
 set(SFML_INCLUDE_DIR ${SFML_ROOT}/include/)
 
 if (MSVC)
-    target_compile_options(project_warnings INTERFACE /W4 /WX "/permissive-")
+    target_compile_options(uxx_warnings INTERFACE /W4 /WX "/permissive-")
 
     if (CMAKE_BUILD_TYPE EQUAL "DEBUG")
         message(STATUS "Debug build for Windows")
@@ -70,7 +70,7 @@ if (MSVC)
     endif ()
 else ()
     message(STATUS "Building for Linux")
-    target_compile_options(project_warnings INTERFACE
+    target_compile_options(uxx_warnings INTERFACE
             -Wall
             -Werror
             -Wextra
@@ -87,7 +87,7 @@ else ()
             -Wformat=2)
 
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-        target_compile_options(project_warnings INTERFACE
+        target_compile_options(uxx_warnings INTERFACE
                 -Wmisleading-indentation
                 -Wduplicated-cond
                 -Wduplicated-branches
@@ -107,11 +107,11 @@ message(STATUS "OpenGL libraries: ${OPENGL_LIBRARIES}")
 
 add_subdirectory(ext)
 add_subdirectory(src)
-if (NOT DISABLE_EXAMPLES)
+if (NOT UXX_DISABLE_EXAMPLES)
     add_subdirectory(examples)
 endif ()
 
-if (NOT DISABLE_TESTS)
+if (NOT UXX_DISABLE_TESTS)
     enable_testing()
     add_subdirectory(test)
 endif ()

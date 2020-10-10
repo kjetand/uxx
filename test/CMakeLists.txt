@@ -10,6 +10,6 @@ target_include_directories(unit_tests PRIVATE
         ${PROJECT_SOURCE_DIR}/ext/include/
         ${PROJECT_SOURCE_DIR}/ext/imgui/)
 
-target_link_libraries(unit_tests PRIVATE project_warnings ${PROJECT_NAME} imgui_sfml)
+target_link_libraries(unit_tests PRIVATE uxx_warnings ${PROJECT_NAME} imgui_sfml)
 
 add_test(run_unit_tests ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/unit_tests)
