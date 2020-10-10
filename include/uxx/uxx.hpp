@@ -586,6 +586,52 @@ private:
     void invisible_button(string_ref id, const vec2d& size) const;
 };
 
+class UXX_EXPORT menu {
+    friend class menu_bar;
+
+public:
+    ~menu() noexcept = default;
+
+    menu(const menu&) = delete;
+    menu(menu&&) noexcept = default;
+    menu& operator=(const menu&) = delete;
+    menu& operator=(menu&&) noexcept = default;
+
+    bool item(string_ref label) const;
+    void separator() const;
+
+private:
+    explicit menu() noexcept = default;
+};
+
+class UXX_EXPORT menu_bar {
+    friend class scene;
+
+public:
+    ~menu_bar() noexcept = default;
+
+    menu_bar(const menu_bar&) = delete;
+    menu_bar(menu_bar&&) noexcept = default;
+    menu_bar& operator=(const menu_bar&) = delete;
+    menu_bar& operator=(menu_bar&&) noexcept = default;
+
+    template <typename F, typename... Args>
+    void menu(string_ref label, F&& f, Args&&... args) const requires function<F, uxx::menu&, Args...>
+    {
+        if (begin_menu(label)) {
+            uxx::menu m;
+            f(m, std::forward<Args>(args)...);
+            end_menu();
+        }
+    }
+
+private:
+    explicit menu_bar() noexcept = default;
+
+    [[nodiscard]] bool begin_menu(string_ref label) const;
+    void end_menu() const;
+};
+
 class UXX_EXPORT scene {
     friend class app;
 
@@ -611,6 +657,15 @@ public:
     void window(string_ref title, result<bool>& open, const window::properties properties, F&& f, Args&&... args) const requires function<F, uxx::window&, Args...>
     {
         window_impl(title, open, properties, std::forward<F>(f), std::forward<Args>(args)...);
+    }
+
+    template <typename F, typename... Args>
+    void menu_bar(F&& f, Args&&... args) const requires function<F, uxx::menu_bar&, Args...>
+    {
+        begin_main_menu_bar();
+        uxx::menu_bar mb;
+        f(mb, std::forward<Args>(args)...);
+        end_main_menu_bar();
     }
 
 private:
@@ -644,6 +699,9 @@ private:
     [[nodiscard]] window::collapsed begin_window(string_ref title) const;
     [[nodiscard]] window::collapsed begin_window(string_ref title, result<bool>& open, window::properties properties) const;
     void end_window() const;
+
+    void begin_main_menu_bar() const;
+    void end_main_menu_bar() const;
 };
 
 class UXX_EXPORT app {

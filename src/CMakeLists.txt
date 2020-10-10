@@ -8,7 +8,8 @@ add_library(${PROJECT_NAME} SHARED
         tab_bar.cpp
         mouse.cpp
         popup.cpp
-        canvas.cpp)
+        canvas.cpp
+        scene.cpp menu_bar.cpp menu.cpp)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
         uxx_warnings
