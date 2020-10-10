@@ -2,13 +2,13 @@ cmake_minimum_required(VERSION 3.15)
 project(uxx CXX)
 
 if (APPLE)
-    message(FATAL_ERROR "OSX is currently not supported")
+    message(FATAL_ERROR "[uxx] OSX is currently not supported")
 endif ()
 
 if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND
         NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND
         NOT CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    message(FATAL_ERROR "Only MSVC, GCC and Clang compilers are currently supported")
+    message(FATAL_ERROR "[uxx] Only MSVC, GCC and Clang compilers are currently supported")
 endif ()
 
 set(CMAKE_CXX_STANDARD 20)
@@ -30,7 +30,7 @@ else ()
 endif ()
 
 if (NOT EXISTS ${CMAKE_BINARY_DIR}/SFML-2.5.1/)
-    message(STATUS "Downloading SFML 2.5.1")
+    message(STATUS "[uxx] Downloading SFML 2.5.1")
     file(DOWNLOAD ${SFML_URL} ${CMAKE_BINARY_DIR}/SFML.zip
             TIMEOUT 60
             SHOW_PROGRESS)
@@ -46,30 +46,30 @@ if (MSVC)
     target_compile_options(uxx_warnings INTERFACE /W4 /WX "/permissive-")
 
     if (CMAKE_BUILD_TYPE EQUAL "DEBUG")
-        message(STATUS "Debug build for Windows")
+        message(STATUS "[uxx] Debug build for Windows")
         set(SFML_LIBRARIES
                 ${SFML_ROOT}/lib/sfml-graphics-d.lib
                 ${SFML_ROOT}/lib/sfml-system-d.lib
                 ${SFML_ROOT}/lib/sfml-window-d.lib)
-        message(STATUS "Copying SFML debug DLLs to ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+        message(STATUS "[uxx] Copying SFML debug DLLs to ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
         file(COPY ${SFML_ROOT}/bin/sfml-graphics-d-2.dll
                 ${SFML_ROOT}/bin/sfml-system-d-2.dll
                 ${SFML_ROOT}/bin/sfml-window-d-2.dll
                 DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
     else ()
-        message(STATUS "Release build for Windows")
+        message(STATUS "[uxx] Release build for Windows")
         set(SFML_LIBRARIES
                 ${SFML_ROOT}/lib/sfml-graphics.lib
                 ${SFML_ROOT}/lib/sfml-system.lib
                 ${SFML_ROOT}/lib/sfml-window.lib)
-        message(STATUS "Copying SFML release DLLs to ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+        message(STATUS "[uxx] Copying SFML release DLLs to ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
         file(COPY ${SFML_ROOT}/bin/sfml-graphics-2.dll
                 ${SFML_ROOT}/bin/sfml-system-2.dll
                 ${SFML_ROOT}/bin/sfml-window-2.dll
                 DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
     endif ()
 else ()
-    message(STATUS "Building for Linux")
+    message(STATUS "[uxx] Building for Linux")
     target_compile_options(uxx_warnings INTERFACE
             -Wall
             -Werror
@@ -101,9 +101,9 @@ else ()
             ${SFML_ROOT}/lib/libsfml-window.so)
 endif ()
 
-message(STATUS "SFML include directory: ${SFML_INCLUDE_DIR}")
-message(STATUS "SFML libraries: ${SFML_LIBRARIES}")
-message(STATUS "OpenGL libraries: ${OPENGL_LIBRARIES}")
+message(STATUS "[uxx] SFML include directory: ${SFML_INCLUDE_DIR}")
+message(STATUS "[uxx] SFML libraries: ${SFML_LIBRARIES}")
+message(STATUS "[uxx] OpenGL libraries: ${OPENGL_LIBRARIES}")
 
 add_subdirectory(ext)
 add_subdirectory(src)
