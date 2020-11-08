@@ -7,11 +7,6 @@ uxx::window::properties::properties() noexcept
     static_assert(std::is_same_v<decltype(_flags), ImGuiWindowFlags>);
 }
 
-constexpr uxx::window::properties::operator int() const noexcept
-{
-    return _flags;
-}
-
 uxx::window::properties uxx::window::properties::clear() noexcept
 {
     _flags = ImGuiWindowFlags_None;

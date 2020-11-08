@@ -453,7 +453,10 @@ public:
         properties& operator=(const properties&) = default;
         properties& operator=(properties&&) noexcept = default;
 
-        [[nodiscard]] constexpr explicit operator int() const noexcept;
+        [[nodiscard]] constexpr explicit operator int() const noexcept
+        {
+            return _flags;
+        }
 
         properties clear() noexcept;
         properties set_no_title_bar() noexcept;
