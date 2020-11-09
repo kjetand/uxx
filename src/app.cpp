@@ -1,11 +1,27 @@
-#include "uxx/uxx.hpp"
 #include "common.hpp"
+#include "uxx/uxx.hpp"
 
-void uxx::app::mainloop(const std::function<void()>& render) const
+void uxx::app::set_width(unsigned int width) noexcept
 {
-    sf::RenderWindow w(sf::VideoMode(800, 600), "SFML window");
+    _width = width;
+}
+
+void uxx::app::set_height(unsigned int height) noexcept
+{
+    _height = height;
+}
+
+void uxx::app::mainloop(string_ref title, const std::function<void()>& render) const
+{
+    constexpr bool load_default_font = false;
+
+    sf::RenderWindow w(sf::VideoMode(_width, _height), title.c_str());
     w.setVerticalSyncEnabled(true);
-    ImGui::SFML::Init(w);
+    ImGui::SFML::Init(w, load_default_font);
+    auto& io = ImGui::GetIO();
+    io.Fonts->Clear();
+    io.Fonts->AddFontFromFileTTF("Roboto-Medium.ttf", 15.0f);
+    ImGui::SFML::UpdateFontTexture();
 
     sf::Event event {};
     sf::Clock delta_clock {};

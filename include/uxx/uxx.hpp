@@ -4,6 +4,7 @@
 #include <any>
 #include <concepts>
 #include <functional>
+#include <memory>
 #include <optional>
 #include <string>
 #include <type_traits>
@@ -709,6 +710,8 @@ private:
 
 class UXX_EXPORT app {
 public:
+    static constexpr unsigned int DEFAULT_WIDTH { 800 };
+    static constexpr unsigned int DEFAULT_HEIGHT { 600 };
     enum class exit_code : int { success = 0 };
 
     explicit app() noexcept = default;
@@ -719,11 +722,14 @@ public:
     app& operator=(const app&) = delete;
     app& operator=(app&&) noexcept = default;
 
+    void set_width(unsigned int width) noexcept;
+    void set_height(unsigned int height) noexcept;
+
     template <typename F, typename... Args>
-    [[nodiscard]] int run(F f, Args&&... args) const requires function<F, scene&, Args...>
+    [[nodiscard]] int run(string_ref title, F f, Args&&... args) const requires function<F, scene&, Args...>
     {
         scene c;
-        mainloop([&]() {
+        mainloop(title, [&]() {
             f(c, std::forward<Args>(args)...);
         });
         return static_cast<int>(_exit_code);
@@ -731,7 +737,10 @@ public:
 
 private:
     exit_code _exit_code { exit_code::success };
-    void mainloop(const std::function<void()>& render) const;
+    unsigned int _width { uxx::app::DEFAULT_WIDTH };
+    unsigned int _height { uxx::app::DEFAULT_HEIGHT };
+
+    void mainloop(string_ref title, const std::function<void()>& render) const;
 };
 }
 

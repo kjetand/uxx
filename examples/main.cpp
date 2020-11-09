@@ -261,7 +261,7 @@ static void show_draw_primitives_window(uxx::scene& scene)
 int main()
 {
     uxx::app app;
-    return app.run([](auto& scene) {
+    return app.run("UXX demo", [](auto& scene) {
         show_draw_primitives_window(scene);
     });
 }

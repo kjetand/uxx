@@ -101,6 +101,10 @@ else ()
             ${SFML_ROOT}/lib/libsfml-window.so)
 endif ()
 
+message(STATUS "[uxx] Copying fonts to ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+file(GLOB FONT_FILES ${PROJECT_SOURCE_DIR}/fonts/*.ttf)
+file(COPY ${FONT_FILES} DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+
 message(STATUS "[uxx] SFML include directory: ${SFML_INCLUDE_DIR}")
 message(STATUS "[uxx] SFML libraries: ${SFML_LIBRARIES}")
 message(STATUS "[uxx] OpenGL libraries: ${OPENGL_LIBRARIES}")
