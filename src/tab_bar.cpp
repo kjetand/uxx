@@ -1,9 +1,9 @@
 #include "common.hpp"
 #include "uxx/uxx.hpp"
 
-uxx::tab_bar::visible uxx::window::begin_tab_bar(uxx::string_ref id) const
+uxx::tab_bar::visible uxx::window::begin_tab_bar(uxx::id<string_ref> id) const
 {
-    return ImGui::BeginTabBar(id) ? tab_bar::visible::yes : tab_bar::visible::no;
+    return ImGui::BeginTabBar(id.get()) ? tab_bar::visible::yes : tab_bar::visible::no;
 }
 
 void uxx::window::end_tab_bar() const

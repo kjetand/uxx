@@ -265,11 +265,11 @@ void uxx::window::color_picker(uxx::string_ref label, result<rgba_color>& color)
     ImGui::ColorEdit4(label, &color.get().r);
 }
 
-void uxx::window::invisible_button(uxx::string_ref id, const uxx::vec2d& size) const
+void uxx::window::invisible_button(uxx::id<string_ref> id, const uxx::vec2d& size) const
 {
     // TODO: Don't hard code mouse click flags
     // TODO: Return "pressed"-bool?
-    ImGui::InvisibleButton(id, ImVec2 { size.x, size.y }, ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_MouseButtonRight);
+    ImGui::InvisibleButton(id.get(), ImVec2 { size.x, size.y }, ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_MouseButtonRight);
 }
 
 void uxx::window::empty_space(const uxx::vec2d& size) const

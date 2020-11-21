@@ -86,7 +86,7 @@ static void draw_canvas(uxx::canvas& canvas, uxx::pencil& pencil, canvas_state& 
         state.scrolling.y += mouse.get_delta_y();
     }
     if (state.enable_context_menu) {
-        canvas.popup("context", show_canvas_popup, state);
+        canvas.popup(uxx::id<uxx::string_ref>("context"), show_canvas_popup, state);
     }
     pencil.clip_rectangle(canvas.get_position(), canvas_p1, draw_canvas_grid, state, canvas.get_size(), canvas.get_position(), canvas_p1, origin);
 }
@@ -117,7 +117,7 @@ static void show_canvas_tab(uxx::window& tab)
     pencil.set_color(BLACK);
     pencil.draw_rect(canvas_p0, canvas_p1);
 
-    tab.canvas("canvas", canvas_size, draw_canvas, state, canvas_p1);
+    tab.canvas(uxx::id<uxx::string_ref>("canvas"), canvas_size, draw_canvas, state, canvas_p1);
 }
 
 static void show_background_tab(uxx::window& tab)
@@ -152,8 +152,8 @@ static void show_primitives_tab(uxx::window& tab)
 {
     tab.label("Gradients");
     const uxx::vec2d gradient_size { tab.get_content_size().x, 20.0f };
-    tab.canvas("##gradient1", gradient_size, draw_gradient, WHITE, BLACK);
-    tab.canvas("##gradient2", gradient_size, draw_gradient, GREEN, RED);
+    tab.canvas(uxx::id<uxx::string_ref>("##gradient1"), gradient_size, draw_gradient, WHITE, BLACK);
+    tab.canvas(uxx::id<uxx::string_ref>("##gradient2"), gradient_size, draw_gradient, GREEN, RED);
 
     auto pencil = tab.create_pencil();
 
@@ -247,10 +247,10 @@ static void show_primitives_tab(uxx::window& tab)
     tab.empty_space({ (sz + spacing) * 8.8f, (sz + spacing) * 3.0f });
 }
 
-static void show_draw_primitives_window(uxx::scene& scene)
+static void show_draw_primitives_window(uxx::screen& screen)
 {
-    scene.window("Draw primitives", [](auto& window) {
-        window.tab_bar("##TabBar", [](auto& tab_bar) {
+    screen.window("Draw primitives", [](auto& window) {
+        window.tab_bar(uxx::id<uxx::string_ref>("##TabBar"), [](auto& tab_bar) {
             tab_bar.item("Primitives", show_primitives_tab);
             tab_bar.item("Canvas", show_canvas_tab);
             tab_bar.item("Background/Foreground", show_background_tab);

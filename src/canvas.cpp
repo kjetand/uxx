@@ -31,14 +31,14 @@ bool uxx::canvas::is_active() const
     return ImGui::IsItemActive();
 }
 
-void uxx::canvas::open_popup_context_item(uxx::string_ref id) const
+void uxx::canvas::open_popup_context_item(uxx::id<string_ref> id) const
 {
-    ImGui::OpenPopupContextItem(id);
+    ImGui::OpenPopupContextItem(id.get());
 }
 
-uxx::popup::visible uxx::canvas::begin_popup(uxx::string_ref id) const
+uxx::popup::visible uxx::canvas::begin_popup(uxx::id<string_ref> id) const
 {
-    return ImGui::BeginPopup(id) ? popup::visible::yes : popup::visible::no;
+    return ImGui::BeginPopup(id.get()) ? popup::visible::yes : popup::visible::no;
 }
 
 void uxx::canvas::end_popup() const

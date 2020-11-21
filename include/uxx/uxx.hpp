@@ -194,6 +194,8 @@ namespace tags {
     };
     struct out_value {
     };
+    struct id {
+    };
 }
 
 /// Explicit radius type
@@ -210,6 +212,10 @@ using max = explicit_arg<T, tags::max>;
 /// Explicit out value type (neither copyable nor movable)
 template <typename T>
 using result = explicit_arg<T, tags::out_value, type_property::neither_copy_nor_move>;
+
+/// Explicit identifier type
+template <typename T>
+using id = explicit_arg<T, tags::id>;
 
 class pencil {
     friend class window;
@@ -414,7 +420,7 @@ public:
     /// \param f User provided callback
     /// \param args Optional user provided arguments that are yielded to 'f'
     template <typename F, typename... Args>
-    void popup(string_ref id, F&& f, Args&&... args) requires function<F, uxx::popup&, Args...>
+    void popup(id<string_ref> id, F&& f, Args&&... args) requires function<F, uxx::popup&, Args...>
     {
         auto mouse = get_mouse();
         const auto drag_delta = mouse.get_drag_delta(uxx::mouse::button::right);
@@ -435,13 +441,13 @@ private:
 
     explicit canvas(const vec2d& position, const vec2d& size) noexcept;
 
-    [[nodiscard]] popup::visible begin_popup(string_ref id) const;
+    [[nodiscard]] popup::visible begin_popup(id<string_ref> id) const;
     void end_popup() const;
-    void open_popup_context_item(string_ref id) const;
+    void open_popup_context_item(id<string_ref> id) const;
 };
 
 class UXX_EXPORT window {
-    friend class scene;
+    friend class screen;
 
 public:
     class UXX_EXPORT properties {
@@ -555,7 +561,7 @@ public:
     bool slider_int(string_ref label, result<int>& value, min<int> value_min, max<int> value_max) const;
 
     template <typename F, typename... Args>
-    void canvas(string_ref id, const vec2d& size, F&& f, Args&&... args) requires function<F, uxx::canvas&, uxx::pencil&, Args...>
+    void canvas(id<string_ref> id, const vec2d& size, F&& f, Args&&... args) requires function<F, uxx::canvas&, uxx::pencil&, Args...>
     {
         const auto position = get_cursor_screen_position();
         invisible_button(id, size);
@@ -565,7 +571,7 @@ public:
     }
 
     template <typename F, typename... Args>
-    void tab_bar(string_ref id, F&& f, Args&&... args) requires function<F, uxx::tab_bar&, Args...>
+    void tab_bar(id<string_ref> id, F&& f, Args&&... args) requires function<F, uxx::tab_bar&, Args...>
     {
         if (begin_tab_bar(id) == tab_bar::visible::yes) {
             uxx::tab_bar tab_bar(*this);
@@ -585,9 +591,9 @@ private:
     explicit window(collapsed collapsed) noexcept;
     ~window() noexcept = default;
 
-    [[nodiscard]] tab_bar::visible begin_tab_bar(string_ref id) const;
+    [[nodiscard]] tab_bar::visible begin_tab_bar(id<string_ref> id) const;
     void end_tab_bar() const;
-    void invisible_button(string_ref id, const vec2d& size) const;
+    void invisible_button(id<string_ref> id, const vec2d& size) const;
 };
 
 class UXX_EXPORT menu {
@@ -609,7 +615,7 @@ private:
 };
 
 class UXX_EXPORT menu_bar {
-    friend class scene;
+    friend class screen;
 
 public:
     ~menu_bar() noexcept = default;
@@ -636,14 +642,14 @@ private:
     void end_menu() const;
 };
 
-class UXX_EXPORT scene {
+class UXX_EXPORT screen {
     friend class app;
 
 public:
-    scene(const scene&) = delete;
-    scene(scene&&) noexcept = default;
-    scene& operator=(const scene&) = delete;
-    scene& operator=(scene&&) noexcept = default;
+    screen(const screen&) = delete;
+    screen(screen&&) noexcept = default;
+    screen& operator=(const screen&) = delete;
+    screen& operator=(screen&&) noexcept = default;
 
     template <typename F, typename... Args>
     void window(string_ref title, F&& f, Args&&... args) const requires function<F, uxx::window&, Args...>
@@ -673,8 +679,8 @@ public:
     }
 
 private:
-    explicit scene() noexcept = default;
-    ~scene() noexcept = default;
+    explicit screen() noexcept = default;
+    ~screen() noexcept = default;
 
     template <typename F, typename... Args>
     void window_impl(string_ref title, result<bool>& open, const window::properties properties, F&& f, Args&&... args) const requires function<F, uxx::window&, Args...>
@@ -726,9 +732,9 @@ public:
     void set_height(unsigned int height) noexcept;
 
     template <typename F, typename... Args>
-    [[nodiscard]] int run(string_ref title, F f, Args&&... args) const requires function<F, scene&, Args...>
+    [[nodiscard]] int run(string_ref title, F f, Args&&... args) const requires function<F, screen&, Args...>
     {
-        scene c;
+        screen c;
         mainloop(title, [&]() {
             f(c, std::forward<Args>(args)...);
         });
