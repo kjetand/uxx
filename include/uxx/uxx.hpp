@@ -3,6 +3,7 @@
 
 #include <any>
 #include <concepts>
+#include <filesystem>
 #include <functional>
 #include <memory>
 #include <optional>
@@ -217,6 +218,28 @@ using result = explicit_arg<T, tags::out_value, type_property::neither_copy_nor_
 template <typename T>
 using id = explicit_arg<T, tags::id>;
 
+class image {
+    friend class pencil;
+
+public:
+    UXX_EXPORT explicit image(const std::filesystem::path& image_path) noexcept;
+    UXX_EXPORT ~image() noexcept;
+
+    image(const image&) = delete;
+    image(image&&) noexcept = default;
+    image& operator=(const image&) = delete;
+    image& operator=(image&&) noexcept = default;
+
+    [[nodiscard]] UXX_EXPORT unsigned int get_width() const noexcept;
+    [[nodiscard]] UXX_EXPORT unsigned int get_height() const noexcept;
+
+private:
+    struct data;
+    std::unique_ptr<data> _texture;
+
+    [[nodiscard]] unsigned int get_native_handle() const;
+};
+
 class pencil {
     friend class window;
 
@@ -276,6 +299,7 @@ public:
     UXX_EXPORT void draw_convex_poly_filled(const std::vector<vec2d>& points) const;
     UXX_EXPORT void draw_bezier_curve(const vec2d& p1, const vec2d& p2, const vec2d& p3, const vec2d& p4) const;
     UXX_EXPORT void draw_bezier_curve(const vec2d& p1, const vec2d& p2, const vec2d& p3, const vec2d& p4, int num_segments) const;
+    UXX_EXPORT void draw_image(const uxx::image& image) const;
 
     // TODO: Draw text, images...
 

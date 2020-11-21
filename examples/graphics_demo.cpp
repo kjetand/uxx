@@ -247,6 +247,12 @@ static void show_primitives_tab(uxx::window& tab)
     tab.empty_space({ (sz + spacing) * 8.8f, (sz + spacing) * 3.0f });
 }
 
+static void show_image_view(uxx::window& tab)
+{
+    static uxx::image image("image.jpg");
+    tab.create_pencil().draw_image(image);
+}
+
 static void show_draw_primitives_window(uxx::screen& screen)
 {
     screen.window("Draw primitives", [](auto& window) {
@@ -254,6 +260,7 @@ static void show_draw_primitives_window(uxx::screen& screen)
             tab_bar.item("Primitives", show_primitives_tab);
             tab_bar.item("Canvas", show_canvas_tab);
             tab_bar.item("Background/Foreground", show_background_tab);
+            tab_bar.item("Image view", show_image_view);
         });
     });
 }

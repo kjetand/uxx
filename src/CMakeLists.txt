@@ -9,7 +9,10 @@ add_library(${PROJECT_NAME} SHARED
         mouse.cpp
         popup.cpp
         canvas.cpp
-        scene.cpp menu_bar.cpp menu.cpp)
+        scene.cpp
+        menu_bar.cpp
+        menu.cpp
+        image.cpp)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
         uxx_warnings

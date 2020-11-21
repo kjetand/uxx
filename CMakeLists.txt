@@ -45,7 +45,7 @@ set(SFML_INCLUDE_DIR ${SFML_ROOT}/include/)
 if (MSVC)
     target_compile_options(uxx_warnings INTERFACE /W4 /WX "/permissive-")
 
-    if (CMAKE_BUILD_TYPE EQUAL "DEBUG")
+    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
         message(STATUS "[uxx] Debug build for Windows")
         set(SFML_LIBRARIES
                 ${SFML_ROOT}/lib/sfml-graphics-d.lib
