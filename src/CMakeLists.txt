@@ -3,7 +3,7 @@ add_definitions(-DBUILDING_UXX)
 add_library(${PROJECT_NAME} SHARED
         string_ref.cpp
         app.cpp
-        window.cpp
+        pane.cpp
         pencil.cpp
         tab_bar.cpp
         mouse.cpp

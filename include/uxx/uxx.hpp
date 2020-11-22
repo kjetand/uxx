@@ -215,8 +215,7 @@ template <typename T>
 using result = explicit_arg<T, tags::out_value, type_property::neither_copy_nor_move>;
 
 /// Explicit identifier type
-template <typename T>
-using id = explicit_arg<T, tags::id>;
+using id = explicit_arg<string_ref, tags::id>;
 
 class image {
     friend class pencil;
@@ -444,7 +443,7 @@ public:
     /// \param f User provided callback
     /// \param args Optional user provided arguments that are yielded to 'f'
     template <typename F, typename... Args>
-    void popup(id<string_ref> id, F&& f, Args&&... args) requires function<F, uxx::popup&, Args...>
+    void popup(uxx::id id, F&& f, Args&&... args) requires function<F, uxx::popup&, Args...>
     {
         auto mouse = get_mouse();
         const auto drag_delta = mouse.get_drag_delta(uxx::mouse::button::right);
@@ -465,9 +464,9 @@ private:
 
     explicit canvas(const vec2d& position, const vec2d& size) noexcept;
 
-    [[nodiscard]] popup::visible begin_popup(id<string_ref> id) const;
+    [[nodiscard]] popup::visible begin_popup(uxx::id id) const;
     void end_popup() const;
-    void open_popup_context_item(id<string_ref> id) const;
+    void open_popup_context_item(uxx::id id) const;
 };
 
 class UXX_EXPORT pane {
@@ -585,7 +584,7 @@ public:
     bool slider_int(string_ref label, result<int>& value, min<int> value_min, max<int> value_max) const;
 
     template <typename F, typename... Args>
-    void canvas(id<string_ref> id, const vec2d& size, F&& f, Args&&... args) requires function<F, uxx::canvas&, uxx::pencil&, Args...>
+    void canvas(uxx::id id, const vec2d& size, F&& f, Args&&... args) requires function<F, uxx::canvas&, uxx::pencil&, Args...>
     {
         const auto position = get_cursor_screen_position();
         invisible_button(id, size);
@@ -595,7 +594,7 @@ public:
     }
 
     template <typename F, typename... Args>
-    void tab_bar(id<string_ref> id, F&& f, Args&&... args) requires function<F, uxx::tab_bar&, Args...>
+    void tab_bar(uxx::id id, F&& f, Args&&... args) requires function<F, uxx::tab_bar&, Args...>
     {
         if (begin_tab_bar(id) == tab_bar::visible::yes) {
             uxx::tab_bar tab_bar(*this);
@@ -615,9 +614,9 @@ private:
     explicit pane(collapsed collapsed) noexcept;
     ~pane() noexcept = default;
 
-    [[nodiscard]] tab_bar::visible begin_tab_bar(id<string_ref> id) const;
+    [[nodiscard]] tab_bar::visible begin_tab_bar(uxx::id id) const;
     void end_tab_bar() const;
-    void invisible_button(id<string_ref> id, const vec2d& size) const;
+    void invisible_button(uxx::id id, const vec2d& size) const;
 };
 
 class UXX_EXPORT menu {

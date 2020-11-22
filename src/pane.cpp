@@ -265,7 +265,7 @@ void uxx::pane::color_picker(uxx::string_ref label, result<rgba_color>& color) c
     ImGui::ColorEdit4(label, &color.get().r);
 }
 
-void uxx::pane::invisible_button(uxx::id<string_ref> id, const uxx::vec2d& size) const
+void uxx::pane::invisible_button(uxx::id id, const uxx::vec2d& size) const
 {
     // TODO: Don't hard code mouse click flags
     // TODO: Return "pressed"-bool?

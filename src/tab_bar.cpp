@@ -1,7 +1,7 @@
 #include "common.hpp"
 #include "uxx/uxx.hpp"
 
-uxx::tab_bar::visible uxx::pane::begin_tab_bar(uxx::id<string_ref> id) const
+uxx::tab_bar::visible uxx::pane::begin_tab_bar(uxx::id id) const
 {
     return ImGui::BeginTabBar(id.get()) ? tab_bar::visible::yes : tab_bar::visible::no;
 }

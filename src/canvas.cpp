@@ -31,12 +31,12 @@ bool uxx::canvas::is_active() const
     return ImGui::IsItemActive();
 }
 
-void uxx::canvas::open_popup_context_item(uxx::id<string_ref> id) const
+void uxx::canvas::open_popup_context_item(uxx::id id) const
 {
     ImGui::OpenPopupContextItem(id.get());
 }
 
-uxx::popup::visible uxx::canvas::begin_popup(uxx::id<string_ref> id) const
+uxx::popup::visible uxx::canvas::begin_popup(uxx::id id) const
 {
     return ImGui::BeginPopup(id.get()) ? popup::visible::yes : popup::visible::no;
 }
