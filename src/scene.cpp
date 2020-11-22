@@ -1,14 +1,14 @@
 #include "common.hpp"
 #include "uxx/uxx.hpp"
 
-uxx::window::collapsed uxx::screen::begin_window(uxx::string_ref title) const
+uxx::pane::collapsed uxx::screen::begin_window(uxx::string_ref title) const
 {
-    return ImGui::Begin(title) ? window::collapsed::no : window::collapsed::yes;
+    return ImGui::Begin(title) ? pane::collapsed::no : pane::collapsed::yes;
 }
 
-uxx::window::collapsed uxx::screen::begin_window(uxx::string_ref title, uxx::result<bool>& open, uxx::window::properties properties) const
+uxx::pane::collapsed uxx::screen::begin_window(uxx::string_ref title, uxx::result<bool>& open, uxx::pane::properties properties) const
 {
-    return ImGui::Begin(title, &open.get(), static_cast<int>(properties)) ? window::collapsed::no : window::collapsed::yes;
+    return ImGui::Begin(title, &open.get(), static_cast<int>(properties)) ? pane::collapsed::no : pane::collapsed::yes;
 }
 
 void uxx::screen::end_window() const

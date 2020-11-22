@@ -91,7 +91,7 @@ static void draw_canvas(uxx::canvas& canvas, uxx::pencil& pencil, canvas_state& 
     pencil.clip_rectangle(canvas.get_position(), canvas_p1, draw_canvas_grid, state, canvas.get_size(), canvas.get_position(), canvas_p1, origin);
 }
 
-static void show_canvas_tab(uxx::window& tab)
+static void show_canvas_tab(uxx::pane& tab)
 {
     static canvas_state state {};
 
@@ -120,7 +120,7 @@ static void show_canvas_tab(uxx::window& tab)
     tab.canvas(uxx::id<uxx::string_ref>("canvas"), canvas_size, draw_canvas, state, canvas_p1);
 }
 
-static void show_background_tab(uxx::window& tab)
+static void show_background_tab(uxx::pane& tab)
 {
     static uxx::result<bool> draw_bg { true };
     static uxx::result<bool> draw_fg { true };
@@ -148,7 +148,7 @@ static void show_background_tab(uxx::window& tab)
     }
 }
 
-static void show_primitives_tab(uxx::window& tab)
+static void show_primitives_tab(uxx::pane& tab)
 {
     tab.label("Gradients");
     const uxx::vec2d gradient_size { tab.get_content_size().x, 20.0f };
@@ -247,7 +247,7 @@ static void show_primitives_tab(uxx::window& tab)
     tab.empty_space({ (sz + spacing) * 8.8f, (sz + spacing) * 3.0f });
 }
 
-static void show_image_view(uxx::window& tab)
+static void show_image_view(uxx::pane& tab)
 {
     static uxx::image image("image.jpg");
     tab.create_pencil().draw_image(image);

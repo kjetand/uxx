@@ -23,7 +23,7 @@
 
 namespace uxx {
 
-class window;
+class pane;
 
 enum class type_property {
     copy_and_move,
@@ -241,7 +241,7 @@ private:
 };
 
 class pencil {
-    friend class window;
+    friend class pane;
 
 public:
     enum type {
@@ -326,7 +326,7 @@ private:
 };
 
 class UXX_EXPORT tab_bar {
-    friend class window;
+    friend class pane;
 
 public:
     tab_bar(const tab_bar&) = delete;
@@ -337,7 +337,7 @@ public:
     // TODO: Implement tab bar/item properties
 
     template <typename F, typename... Args>
-    void item(string_ref label, F&& f, Args&&... args) const requires function<F, uxx::window&, Args...>
+    void item(string_ref label, F&& f, Args&&... args) const requires function<F, uxx::pane&, Args...>
     {
         if (begin_tab_item(label)) {
             f(_window, std::forward<Args>(args)...);
@@ -351,9 +351,9 @@ private:
         no
     };
 
-    uxx::window& _window;
+    uxx::pane& _window;
 
-    explicit tab_bar(uxx::window& w) noexcept;
+    explicit tab_bar(uxx::pane& w) noexcept;
     ~tab_bar() noexcept = default;
 
     [[nodiscard]] bool begin_tab_item(string_ref label) const;
@@ -382,7 +382,7 @@ private:
 };
 
 class mouse {
-    friend class window;
+    friend class pane;
     friend class canvas;
 
 public:
@@ -416,7 +416,7 @@ private:
 };
 
 class UXX_EXPORT canvas {
-    friend class window;
+    friend class pane;
 
 public:
     ~canvas() noexcept = default;
@@ -470,7 +470,7 @@ private:
     void open_popup_context_item(id<string_ref> id) const;
 };
 
-class UXX_EXPORT window {
+class UXX_EXPORT pane {
     friend class screen;
 
 public:
@@ -518,10 +518,10 @@ public:
         int _flags;
     };
 
-    window(const window&) = delete;
-    window(window&&) noexcept = default;
-    window& operator=(const window&) = delete;
-    window& operator=(window&&) noexcept = default;
+    pane(const pane&) = delete;
+    pane(pane&&) noexcept = default;
+    pane& operator=(const pane&) = delete;
+    pane& operator=(pane&&) noexcept = default;
 
     /// \return Position of the current window relative to the application screen.
     [[nodiscard]] vec2d get_position() const;
@@ -612,8 +612,8 @@ private:
 
     collapsed _collapsed;
 
-    explicit window(collapsed collapsed) noexcept;
-    ~window() noexcept = default;
+    explicit pane(collapsed collapsed) noexcept;
+    ~pane() noexcept = default;
 
     [[nodiscard]] tab_bar::visible begin_tab_bar(id<string_ref> id) const;
     void end_tab_bar() const;
@@ -676,19 +676,19 @@ public:
     screen& operator=(screen&&) noexcept = default;
 
     template <typename F, typename... Args>
-    void window(string_ref title, F&& f, Args&&... args) const requires function<F, uxx::window&, Args...>
+    void window(string_ref title, F&& f, Args&&... args) const requires function<F, uxx::pane&, Args...>
     {
         window_impl(title, std::forward<F>(f), std::forward<Args>(args)...);
     }
 
     template <typename F, typename... Args>
-    void window(string_ref title, result<bool>& open, F&& f, Args&&... args) const requires function<F, uxx::window&, Args...>
+    void window(string_ref title, result<bool>& open, F&& f, Args&&... args) const requires function<F, uxx::pane&, Args...>
     {
-        window_impl(title, open, window::properties {}, std::forward<F>(f), std::forward<Args>(args)...);
+        window_impl(title, open, pane::properties {}, std::forward<F>(f), std::forward<Args>(args)...);
     }
 
     template <typename F, typename... Args>
-    void window(string_ref title, result<bool>& open, const window::properties properties, F&& f, Args&&... args) const requires function<F, uxx::window&, Args...>
+    void window(string_ref title, result<bool>& open, const pane::properties properties, F&& f, Args&&... args) const requires function<F, uxx::pane&, Args...>
     {
         window_impl(title, open, properties, std::forward<F>(f), std::forward<Args>(args)...);
     }
@@ -707,12 +707,12 @@ private:
     ~screen() noexcept = default;
 
     template <typename F, typename... Args>
-    void window_impl(string_ref title, result<bool>& open, const window::properties properties, F&& f, Args&&... args) const requires function<F, uxx::window&, Args...>
+    void window_impl(string_ref title, result<bool>& open, const pane::properties properties, F&& f, Args&&... args) const requires function<F, uxx::pane&, Args...>
     {
         if (open.get()) {
             const auto collapsed = begin_window(title, open, properties);
             {
-                uxx::window w { collapsed };
+                uxx::pane w { collapsed };
                 f(w, std::forward<Args>(args)...);
             }
             end_window();
@@ -720,18 +720,18 @@ private:
     }
 
     template <typename F, typename... Args>
-    void window_impl(string_ref title, F&& f, Args&&... args) const requires function<F, uxx::window&, Args...>
+    void window_impl(string_ref title, F&& f, Args&&... args) const requires function<F, uxx::pane&, Args...>
     {
         const auto collapsed = begin_window(title);
         {
-            uxx::window w { collapsed };
+            uxx::pane w { collapsed };
             f(w, std::forward<Args>(args)...);
         }
         end_window();
     }
 
-    [[nodiscard]] window::collapsed begin_window(string_ref title) const;
-    [[nodiscard]] window::collapsed begin_window(string_ref title, result<bool>& open, window::properties properties) const;
+    [[nodiscard]] pane::collapsed begin_window(string_ref title) const;
+    [[nodiscard]] pane::collapsed begin_window(string_ref title, result<bool>& open, pane::properties properties) const;
     void end_window() const;
 
     void begin_main_menu_bar() const;
