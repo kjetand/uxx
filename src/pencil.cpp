@@ -227,10 +227,3 @@ void uxx::pencil::pop_clip_rect() const
 {
     ImGui::PopClipRect();
 }
-
-void uxx::pencil::draw_image(const uxx::image& image) const
-{
-    if (image._texture) {
-        ImGui::Image(reinterpret_cast<void*>(static_cast<intptr_t>(image.get_native_handle())), { static_cast<float>(image.get_width()), static_cast<float>(image.get_height()) });
-    }
-}

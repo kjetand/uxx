@@ -197,6 +197,10 @@ namespace tags {
     };
     struct id {
     };
+    struct width {
+    };
+    struct height {
+    };
 }
 
 /// Explicit radius type
@@ -217,8 +221,14 @@ using result = explicit_arg<T, tags::out_value, type_property::neither_copy_nor_
 /// Explicit identifier type
 using id = explicit_arg<string_ref, tags::id>;
 
+/// Explicit width type
+using width = explicit_arg<float, tags::width>;
+
+/// Explicit height type
+using height = explicit_arg<float, tags::width>;
+
 class image {
-    friend class pencil;
+    friend class pane;
 
 public:
     UXX_EXPORT explicit image(const std::filesystem::path& image_path) noexcept;
@@ -229,8 +239,8 @@ public:
     image& operator=(const image&) = delete;
     image& operator=(image&&) noexcept = default;
 
-    [[nodiscard]] UXX_EXPORT unsigned int get_width() const noexcept;
-    [[nodiscard]] UXX_EXPORT unsigned int get_height() const noexcept;
+    [[nodiscard]] UXX_EXPORT float get_width() const noexcept;
+    [[nodiscard]] UXX_EXPORT float get_height() const noexcept;
 
 private:
     struct data;
@@ -298,7 +308,6 @@ public:
     UXX_EXPORT void draw_convex_poly_filled(const std::vector<vec2d>& points) const;
     UXX_EXPORT void draw_bezier_curve(const vec2d& p1, const vec2d& p2, const vec2d& p3, const vec2d& p4) const;
     UXX_EXPORT void draw_bezier_curve(const vec2d& p1, const vec2d& p2, const vec2d& p3, const vec2d& p4, int num_segments) const;
-    UXX_EXPORT void draw_image(const uxx::image& image) const;
 
     // TODO: Draw text, images...
 
@@ -582,6 +591,14 @@ public:
     /// \param value_max Maximum allowed value.
     /// \return True if value is changed.
     bool slider_int(string_ref label, result<int>& value, min<int> value_min, max<int> value_max) const;
+    /// Draw image.
+    /// \param image
+    void draw_image(const uxx::image& image) const;
+    /// Draw image width explicit width and height.
+    /// \param image
+    /// \param width
+    /// \param height
+    void draw_image(const uxx::image& image, const uxx::width width, const uxx::height height) const;
 
     template <typename F, typename... Args>
     void canvas(uxx::id id, const vec2d& size, F&& f, Args&&... args) requires function<F, uxx::canvas&, uxx::pencil&, Args...>

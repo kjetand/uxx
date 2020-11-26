@@ -250,7 +250,7 @@ static void show_primitives_tab(uxx::pane& tab)
 static void show_image_view(uxx::pane& tab)
 {
     static uxx::image image("image.jpg");
-    tab.create_pencil().draw_image(image);
+    tab.draw_image(image, uxx::width { 200.0f }, uxx::height { 200.0f });
 }
 
 static void show_draw_primitives_window(uxx::screen& screen)

@@ -276,3 +276,15 @@ void uxx::pane::empty_space(const uxx::vec2d& size) const
 {
     ImGui::Dummy({ size.x, size.y });
 }
+
+void uxx::pane::draw_image(const uxx::image& image) const
+{
+    draw_image(image, uxx::width { image.get_width() }, uxx::height { image.get_height() });
+}
+
+void uxx::pane::draw_image(const uxx::image& image, const uxx::width width, const uxx::height height) const
+{
+    if (nullptr != image._texture) {
+        ImGui::Image(reinterpret_cast<void*>(static_cast<intptr_t>(image.get_native_handle())), { width.get(), height.get() });
+    }
+}

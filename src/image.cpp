@@ -19,20 +19,20 @@ uxx::image::~image() noexcept
 {
 }
 
-unsigned int uxx::image::get_width() const noexcept
+float uxx::image::get_width() const noexcept
 {
     if (_texture) {
-        return _texture->texture.getSize().x;
+        return static_cast<float>(_texture->texture.getSize().x);
     }
-    return 0;
+    return {};
 }
 
-unsigned int uxx::image::get_height() const noexcept
+float uxx::image::get_height() const noexcept
 {
     if (_texture) {
-        return _texture->texture.getSize().y;
+        return static_cast<float>(_texture->texture.getSize().y);
     }
-    return 0;
+    return {};
 }
 
 unsigned int uxx::image::get_native_handle() const
