@@ -243,10 +243,43 @@ public:
     [[nodiscard]] UXX_EXPORT float get_height() const noexcept;
 
 private:
-    struct data;
-    std::unique_ptr<data> _texture;
+    struct raw_image;
+    std::unique_ptr<raw_image> _raw_image;
 
-    [[nodiscard]] unsigned int get_native_handle() const;
+    [[nodiscard]] std::optional<unsigned int> get_native_handle() const;
+};
+
+class video {
+    friend class pane;
+
+public:
+    UXX_EXPORT explicit video();
+    UXX_EXPORT ~video();
+
+    video(const video&) = delete;
+    video(video&&) noexcept = default;
+    video& operator=(const video&) = delete;
+    video& operator=(video&&) noexcept = default;
+
+    UXX_EXPORT void load_from_disk(const std::filesystem::path& video_path);
+    UXX_EXPORT void play() noexcept;
+    UXX_EXPORT void pause() noexcept;
+    UXX_EXPORT void stop() noexcept;
+    [[nodiscard]] UXX_EXPORT bool is_loaded() const noexcept;
+
+    UXX_EXPORT uxx::width get_width() const noexcept;
+    UXX_EXPORT uxx::height get_height() const noexcept;
+
+private:
+    class driver;
+    struct raw_image;
+
+    std::vector<unsigned char> _raw_frame;
+    std::unique_ptr<driver> _driver;
+    std::unique_ptr<raw_image> _raw_image;
+
+    [[nodiscard]] std::optional<unsigned int> get_native_handle() const;
+    void render() const;
 };
 
 class pencil {
@@ -599,6 +632,9 @@ public:
     /// \param width
     /// \param height
     void draw_image(const uxx::image& image, const uxx::width width, const uxx::height height) const;
+    /// Draw video.
+    /// \param video
+    void draw_video(const uxx::video& video) const;
 
     template <typename F, typename... Args>
     void canvas(uxx::id id, const vec2d& size, F&& f, Args&&... args) requires function<F, uxx::canvas&, uxx::pencil&, Args...>

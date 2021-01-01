@@ -1,0 +1,12 @@
+FROM ubuntu:18.04
+RUN apt update && apt -y install cmake g++-10 libvlc-dev
+
+COPY . /usr/src/
+WORKDIR /usr/src/
+
+RUN export CXX=/usr/bin/g++-10 \
+ && mkdir build \
+ && cd build \
+ && cmake .. \
+ && make -j 24 \
+ && ctest -V

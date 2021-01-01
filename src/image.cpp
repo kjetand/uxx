@@ -1,17 +1,17 @@
 #include "common.hpp"
 #include "uxx/uxx.hpp"
 
-struct uxx::image::data {
+struct uxx::image::raw_image {
     sf::Texture texture {};
 };
 
 uxx::image::image(const std::filesystem::path& image_path) noexcept
-    : _texture { std::make_unique<data>() }
+    : _raw_image { std::make_unique<raw_image>() }
 {
     auto path = image_path.generic_string();
 
-    if (!_texture->texture.loadFromFile(path)) {
-        _texture = nullptr;
+    if (!_raw_image->texture.loadFromFile(path)) {
+        _raw_image = nullptr;
     }
 }
 
@@ -21,21 +21,24 @@ uxx::image::~image() noexcept
 
 float uxx::image::get_width() const noexcept
 {
-    if (_texture) {
-        return static_cast<float>(_texture->texture.getSize().x);
+    if (_raw_image) {
+        return static_cast<float>(_raw_image->texture.getSize().x);
     }
     return {};
 }
 
 float uxx::image::get_height() const noexcept
 {
-    if (_texture) {
-        return static_cast<float>(_texture->texture.getSize().y);
+    if (_raw_image) {
+        return static_cast<float>(_raw_image->texture.getSize().y);
     }
     return {};
 }
 
-unsigned int uxx::image::get_native_handle() const
+std::optional<unsigned int> uxx::image::get_native_handle() const
 {
-    return _texture->texture.getNativeHandle();
+    if (nullptr != _raw_image) {
+        return _raw_image->texture.getNativeHandle();
+    }
+    return {};
 }

@@ -12,16 +12,19 @@ add_library(${PROJECT_NAME} SHARED
         scene.cpp
         menu_bar.cpp
         menu.cpp
-        image.cpp)
+        image.cpp
+        video.cpp)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
         uxx_warnings
         ${OPENGL_LIBRARIES}
         ${SFML_LIBRARIES}
+        ${LIBVLC_LIBRARIES}
         imgui_sfml)
 
 target_include_directories(${PROJECT_NAME} PRIVATE
         ${PROJECT_SOURCE_DIR}/include
         ${CMAKE_BINARY_DIR}/SFML-2.5.1/include
+        ${LIBVLC_INCLUDE_DIR}
         ${PROJECT_SOURCE_DIR}/ext/imgui
         ${PROJECT_SOURCE_DIR}/ext/include)

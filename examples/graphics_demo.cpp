@@ -253,6 +253,36 @@ static void show_image_view(uxx::pane& tab)
     tab.draw_image(image, uxx::width { 200.0f }, uxx::height { 200.0f });
 }
 
+static void show_video(uxx::pane& tab)
+{
+    static uxx::result<std::string> uri {};
+    static uxx::video video {};
+
+    tab.input_text("Video path", uri);
+
+    if (tab.button("Play")) {
+        if (not video.is_loaded()) {
+            try {
+                video.load_from_disk(uri.get());
+            } catch (const std::exception& ex) {
+                std::puts(ex.what());
+            }
+        }
+        video.play();
+    }
+    tab.same_line();
+
+    if (tab.button("Pause")) {
+        video.pause();
+    }
+    tab.same_line();
+
+    if (tab.button("Stop")) {
+        video.stop();
+    }
+    tab.draw_video(video);
+}
+
 static void show_draw_primitives_window(uxx::screen& screen)
 {
     screen.window("Draw primitives", [](auto& window) {
@@ -261,6 +291,7 @@ static void show_draw_primitives_window(uxx::screen& screen)
             tab_bar.item("Canvas", show_canvas_tab);
             tab_bar.item("Background/Foreground", show_background_tab);
             tab_bar.item("Image view", show_image_view);
+            tab_bar.item("Video", show_video);
         });
     });
 }

@@ -18,58 +18,21 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-
-add_library(uxx_warnings INTERFACE)
-
-find_package(OpenGL REQUIRED)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake")
 
 if (MSVC)
-    set(SFML_URL https://www.sfml-dev.org/files/SFML-2.5.1-windows-vc15-64-bit.zip)
+    message(STATUS "[uxx] Building for Windows")
 else ()
-    set(SFML_URL https://www.sfml-dev.org/files/SFML-2.5.1-linux-gcc-64-bit.tar.gz)
+    message(STATUS "[uxx] Building for Linux")
 endif ()
 
-if (NOT EXISTS ${CMAKE_BINARY_DIR}/SFML-2.5.1/)
-    message(STATUS "[uxx] Downloading SFML 2.5.1")
-    file(DOWNLOAD ${SFML_URL} ${CMAKE_BINARY_DIR}/SFML.zip
-            TIMEOUT 60
-            SHOW_PROGRESS)
-    execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzf ${CMAKE_BINARY_DIR}/SFML.zip
-            WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
-    file(REMOVE ${CMAKE_BINARY_DIR}/SFML.zip)
-endif ()
 
-set(SFML_ROOT ${CMAKE_BINARY_DIR}/SFML-2.5.1/)
-set(SFML_INCLUDE_DIR ${SFML_ROOT}/include/)
+add_library(uxx_warnings INTERFACE)
+include(Dependencies)
 
 if (MSVC)
     target_compile_options(uxx_warnings INTERFACE /W4 /WX "/permissive-")
-
-    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-        message(STATUS "[uxx] Debug build for Windows")
-        set(SFML_LIBRARIES
-                ${SFML_ROOT}/lib/sfml-graphics-d.lib
-                ${SFML_ROOT}/lib/sfml-system-d.lib
-                ${SFML_ROOT}/lib/sfml-window-d.lib)
-        message(STATUS "[uxx] Copying SFML debug DLLs to ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
-        file(COPY ${SFML_ROOT}/bin/sfml-graphics-d-2.dll
-                ${SFML_ROOT}/bin/sfml-system-d-2.dll
-                ${SFML_ROOT}/bin/sfml-window-d-2.dll
-                DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-    else ()
-        message(STATUS "[uxx] Release build for Windows")
-        set(SFML_LIBRARIES
-                ${SFML_ROOT}/lib/sfml-graphics.lib
-                ${SFML_ROOT}/lib/sfml-system.lib
-                ${SFML_ROOT}/lib/sfml-window.lib)
-        message(STATUS "[uxx] Copying SFML release DLLs to ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
-        file(COPY ${SFML_ROOT}/bin/sfml-graphics-2.dll
-                ${SFML_ROOT}/bin/sfml-system-2.dll
-                ${SFML_ROOT}/bin/sfml-window-2.dll
-                DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-    endif ()
 else ()
-    message(STATUS "[uxx] Building for Linux")
     target_compile_options(uxx_warnings INTERFACE
             -Wall
             -Werror
@@ -94,11 +57,6 @@ else ()
                 -Wlogical-op
                 -Wuseless-cast)
     endif ()
-
-    set(SFML_LIBRARIES
-            ${SFML_ROOT}/lib/libsfml-graphics.so
-            ${SFML_ROOT}/lib/libsfml-system.so
-            ${SFML_ROOT}/lib/libsfml-window.so)
 endif ()
 
 message(STATUS "[uxx] Copying fonts to ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
