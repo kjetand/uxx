@@ -45,16 +45,9 @@ else ()
 
     find_library(LIBVLC_LIBRARIES NAMES vlc libvlc)
 
-    find_library(LIBVLCCORE_LIBRARY NAMES vlccore libvlccore
-            HINTS "$ENV{LIBVLC_LIBRARIES_PATH}"
-            PATHS
-            "$ENV{LIB_DIR}/lib")
-
-    find_library(LIBVLCCORE_LIBRARY NAMES vlccore libvlccore)
-
-    if (LIBVLC_INCLUDE_DIR AND LIBVLC_LIBRARIES AND LIBVLCCORE_LIBRARY)
+    if (LIBVLC_INCLUDE_DIR AND LIBVLC_LIBRARIES)
         set(LIBVLC_FOUND TRUE)
-    endif (LIBVLC_INCLUDE_DIR AND LIBVLC_LIBRARIES AND LIBVLCCORE_LIBRARY)
+    endif ()
 
     if (LIBVLC_FOUND)
         get_filename_component(LIBVLC_LIB_DIR ${LIBVLC_LIBRARIES} PATH)

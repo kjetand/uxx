@@ -22,9 +22,13 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
         ${LIBVLC_LIBRARIES}
         imgui_sfml)
 
+if (MSVC)
+    set(SFML_INCLUDE_DIR ${CMAKE_BINARY_DIR}/SFML-2.5.1/include)
+endif ()
+
 target_include_directories(${PROJECT_NAME} PRIVATE
         ${PROJECT_SOURCE_DIR}/include
-        ${CMAKE_BINARY_DIR}/SFML-2.5.1/include
+        ${SFML_INCLUDE_DIR}
         ${LIBVLC_INCLUDE_DIR}
         ${PROJECT_SOURCE_DIR}/ext/imgui
         ${PROJECT_SOURCE_DIR}/ext/include)

@@ -26,6 +26,9 @@ jobs:
             - libglu1-mesa-dev
             - freeglut3-dev
             - mesa-common-dev
+            - libvlc-dev
+            - libfreetype6-dev
+            - libxrandr-dev
 
     - os: linux
       dist: bionic
@@ -39,6 +42,9 @@ jobs:
             - libglu1-mesa-dev
             - freeglut3-dev
             - mesa-common-dev
+            - libvlc-dev
+            - libfreetype6-dev
+            - libxrandr-dev
       env:
         - MATRIX_EVAL="CC=clang-10 && CXX=clang++-10"
 
@@ -46,8 +52,12 @@ before_script:
   - eval "${MATRIX_EVAL}"
 
 script:
+  - cd /tmp
+  - wget https://www.sfml-dev.org/files/SFML-2.5.1-linux-gcc-64-bit.tar.gz
+  - tar xzf SFML-2.5.1-linux-gcc-64-bit.tar.gz
+  - cd -
   - mkdir build
   - cd build
-  - cmake ..
+  - cmake -DSFML_ROOT="/tmp/SFML-2.5.1/" ..
   - cmake --build .
   - ctest -V

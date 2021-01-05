@@ -77,3 +77,5 @@ if (NOT UXX_DISABLE_TESTS)
     enable_testing()
     add_subdirectory(test)
 endif ()
+
+include(DockerBuild)

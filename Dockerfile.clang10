@@ -3,7 +3,7 @@ RUN apt update
 RUN apt -y install software-properties-common
 RUN add-apt-repository ppa:ubuntu-toolchain-r/test
 RUN apt update
-RUN apt -y install g++-10 libvlc-dev wget tar python-pip libglu1-mesa-dev freeglut3-dev mesa-common-dev libfreetype6-dev libxrandr-dev
+RUN apt -y install g++-10 clang-10 libvlc-dev wget tar python-pip libglu1-mesa-dev freeglut3-dev mesa-common-dev libfreetype6-dev libxrandr-dev
 RUN pip install cmake
 
 WORKDIR /tmp
@@ -13,7 +13,7 @@ RUN tar xzf SFML-2.5.1-linux-gcc-64-bit.tar.gz
 COPY . /usr/src/
 WORKDIR /usr/src/
 
-RUN export CXX=/usr/bin/g++-10 \
+RUN export CXX=/usr/bin/clang++-10 \
  && mkdir build \
  && cd build \
  && cmake -DSFML_ROOT="/tmp/SFML-2.5.1/" .. \
