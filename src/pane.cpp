@@ -291,8 +291,13 @@ void uxx::pane::draw_image(const uxx::image& image, const uxx::width width, cons
 
 void uxx::pane::draw_video(const uxx::video& video) const
 {
+    draw_video(video, video.get_width(), video.get_height());
+}
+
+void uxx::pane::draw_video(const uxx::video& video, const uxx::width width, const uxx::height height) const
+{
     if (const auto native_handle = video.get_native_handle(); native_handle) {
         video.render();
-        ImGui::Image(reinterpret_cast<void*>(static_cast<intptr_t>(*native_handle)), { video.get_width(), video.get_height() });
+        ImGui::Image(reinterpret_cast<void*>(static_cast<intptr_t>(*native_handle)), { width, height });
     }
 }

@@ -32,6 +32,8 @@ enum class type_property {
 
 template <typename T, typename Tag, type_property Property = type_property::copy_and_move>
 class explicit_arg {
+    using this_type = explicit_arg<T, Tag, Property>;
+
 public:
     static constexpr bool is_copyable_and_movable = Property == type_property::copy_and_move;
 
@@ -41,18 +43,18 @@ public:
 
     ~explicit_arg() noexcept(std::is_nothrow_destructible_v<T>) = default;
 
-    explicit_arg(const explicit_arg<T, Tag, Property>&) noexcept(std::is_nothrow_copy_constructible_v<T>) requires(std::is_copy_constructible_v<T>&& is_copyable_and_movable) = default;
-    explicit_arg(explicit_arg<T, Tag, Property>&&) noexcept(std::is_nothrow_move_constructible_v<T>) requires(std::is_move_constructible_v<T>&& is_copyable_and_movable) = default;
-    explicit_arg<T, Tag, Property>& operator=(const explicit_arg<T, Tag, Property>&) noexcept(std::is_nothrow_copy_assignable_v<T>) requires(std::is_copy_assignable_v<T>&& is_copyable_and_movable) = default;
-    explicit_arg<T, Tag, Property>& operator=(explicit_arg<T, Tag, Property>&&) noexcept(std::is_nothrow_move_assignable_v<T>) requires(std::is_move_assignable_v<T>&& is_copyable_and_movable) = default;
+    explicit_arg(const this_type&) noexcept(std::is_nothrow_copy_constructible_v<T>) requires(std::is_copy_constructible_v<T>&& is_copyable_and_movable) = default;
+    explicit_arg(this_type&&) noexcept(std::is_nothrow_move_constructible_v<T>) requires(std::is_move_constructible_v<T>&& is_copyable_and_movable) = default;
+    this_type& operator=(const this_type&) noexcept(std::is_nothrow_copy_assignable_v<T>) requires(std::is_copy_assignable_v<T>&& is_copyable_and_movable) = default;
+    this_type& operator=(this_type&&) noexcept(std::is_nothrow_move_assignable_v<T>) requires(std::is_move_assignable_v<T>&& is_copyable_and_movable) = default;
 
-    explicit_arg<T, Tag, Property>& operator=(const T& value) noexcept(std::is_nothrow_copy_assignable_v<T>) requires(std::is_copy_assignable_v<T> && not std::is_const_v<T>)
+    this_type& operator=(const T& value) noexcept(std::is_nothrow_copy_assignable_v<T>) requires(std::is_copy_assignable_v<T> && not std::is_const_v<T>)
     {
         _value = value;
         return *this;
     }
 
-    explicit_arg<T, Tag, Property>& operator=(T&& value) noexcept(std::is_nothrow_move_assignable_v<T>) requires(std::is_move_assignable_v<T> && not std::is_const_v<T>)
+    this_type& operator=(T&& value) noexcept(std::is_nothrow_move_assignable_v<T>) requires(std::is_move_assignable_v<T> && not std::is_const_v<T>)
     {
         _value = std::move(value);
         return *this;
@@ -83,7 +85,7 @@ public:
         return _value == other;
     }
 
-    [[nodiscard]] bool operator==(const explicit_arg<T, Tag, Property>& other) const requires std::equality_comparable<T>
+    [[nodiscard]] bool operator==(const this_type& other) const requires std::equality_comparable<T>
     {
         return _value == other._value;
     }
@@ -635,9 +637,14 @@ public:
     /// \param width
     /// \param height
     void draw_image(const uxx::image& image, const uxx::width width, const uxx::height height) const;
-    /// Draw video.
+    /// Draw video with origin resolution.
     /// \param video
     void draw_video(const uxx::video& video) const;
+    /// Draw video with custom resolution.
+    /// \param video
+    /// \param width
+    /// \param height
+    void draw_video(const uxx::video& video, const uxx::width width, const uxx::height height) const;
 
     template <typename F, typename... Args>
     void canvas(uxx::id id, const vec2d& size, F&& f, Args&&... args) requires function<F, uxx::canvas&, uxx::pencil&, Args...>

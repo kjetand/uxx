@@ -256,6 +256,7 @@ static void show_image_view(uxx::pane& tab)
 static void show_video(uxx::pane& tab)
 {
     static uxx::result<std::string> uri {};
+    static uxx::result<float> scale { 0.1f };
     static uxx::video video {};
 
     tab.input_text("Video path", uri);
@@ -280,7 +281,8 @@ static void show_video(uxx::pane& tab)
     if (tab.button("Stop")) {
         video.stop();
     }
-    tab.draw_video(video);
+    tab.draw_video(video, uxx::width { video.get_width() * scale }, uxx::height { video.get_height() * scale });
+    tab.slider_float("Scale", scale, uxx::min<float> { 0.1f }, uxx::max<float> { 2.0f });
 }
 
 static void show_draw_primitives_window(uxx::screen& screen)
@@ -299,6 +301,8 @@ static void show_draw_primitives_window(uxx::screen& screen)
 int main()
 {
     uxx::app app;
+    app.set_width(1024);
+    app.set_height(600);
     return app.run("UXX demo", [](auto& scene) {
         show_draw_primitives_window(scene);
     });
