@@ -277,9 +277,12 @@ private:
     std::vector<unsigned char> _raw_frame;
     std::unique_ptr<driver> _driver;
     std::unique_ptr<raw_image> _raw_image;
+    float _width;
+    float _height;
 
     [[nodiscard]] std::optional<unsigned int> get_native_handle() const;
     void render() const;
+    std::pair<uxx::width, uxx::height> get_resolution() const;
 };
 
 class pencil {
