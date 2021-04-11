@@ -79,3 +79,4 @@ if (NOT UXX_DISABLE_TESTS)
 endif ()
 
 include(DockerBuild)
+include(Doxygen)
